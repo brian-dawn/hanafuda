@@ -1,13 +1,13 @@
-// Take screenshots of both themes for visual verification.
+// Take screenshots of both themes at desktop + mobile sizes for review.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import url from 'node:url';
-import { chromium } from 'playwright';
+import { chromium, devices } from 'playwright';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
-const PORT = 5174;
+const PORT = 8714;
 
 const MIME = {
   '.html':'text/html','.js':'application/javascript','.mjs':'application/javascript',
@@ -27,16 +27,25 @@ const server = http.createServer((req, res) => {
 }).listen(PORT);
 
 const browser = await chromium.launch({ headless: true });
-for (const theme of ['dark', 'light']) {
-  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-  await page.addInitScript(t => localStorage.setItem('koikoi-theme', t), theme);
-  await page.goto(`http://localhost:${PORT}/?seed=11`);
-  await page.waitForFunction(() => window.__koiKoi && window.__koiKoi.state);
-  await page.waitForTimeout(400);  // let card images render
-  const out = path.join(ROOT, `screenshot-${theme}.png`);
-  await page.screenshot({ path: out, fullPage: true });
-  console.log(`wrote ${out}`);
-  await page.close();
+
+const viewports = [
+  { name: 'desktop', width: 1280, height: 900 },
+  { name: 'tablet',  width: 820,  height: 1100 },
+  { name: 'phone',   width: 390,  height: 844 },
+];
+
+for (const vp of viewports) {
+  for (const theme of ['dark', 'light']) {
+    const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height } });
+    await page.addInitScript(t => localStorage.setItem('koikoi-theme', t), theme);
+    await page.goto(`http://localhost:${PORT}/?seed=11&fast=1`);
+    await page.waitForFunction(() => window.__koiKoi && window.__koiKoi.state);
+    await page.waitForTimeout(500);
+    const out = path.join(ROOT, `screenshot-${vp.name}-${theme}.png`);
+    await page.screenshot({ path: out, fullPage: true });
+    console.log(`wrote ${out}`);
+    await page.close();
+  }
 }
 await browser.close();
 server.close();
