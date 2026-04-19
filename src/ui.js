@@ -3,7 +3,7 @@
 
 import { TYPES, MONTH_NAMES, cardYakuRoles } from './cards.js';
 import { scoreHand } from './scoring.js';
-import { nextTip, resetTutorial } from './tutorial.js';
+import { tutorialAdvice } from './tutorial.js';
 
 const $ = sel => document.querySelector(sel);
 
@@ -163,40 +163,55 @@ function render(state, handlers) {
   applyFLIP(prevRects, state);
 }
 
-let currentTipId = null;
+let currentTipSig = null;
 function renderTutorialBar(state) {
   const bar = $('#tutorial-bar');
   const btn = $('#tutorial-btn');
   if (!state.tutorialActive) {
     bar.hidden = true;
     btn.classList.remove('active');
-    currentTipId = null;
+    currentTipSig = null;
+    clearTutorialHighlights();
     return;
   }
   btn.classList.add('active');
-  const tip = nextTip(state);
-  if (!tip) {
-    // keep the previous tip shown (no flicker) unless bar is hidden
-    if (!currentTipId) bar.hidden = true;
-    return;
-  }
-  if (tip.id === currentTipId) return;  // no change
-  currentTipId = tip.id;
+  const advice = tutorialAdvice(state);
+  const { tip, recommend } = advice;
+  applyTutorialHighlights(recommend);
+  if (!tip) { bar.hidden = true; currentTipSig = null; return; }
+  const sig = `${tip.title}::${tip.text}`;
+  if (sig === currentTipSig) return;
+  currentTipSig = sig;
   bar.hidden = false;
   $('#tutorial-title').textContent = tip.title;
   $('#tutorial-body').textContent = tip.text;
   const strat = $('#tutorial-strategy');
-  if (tip.strategy) {
-    strat.textContent = tip.strategy;
-    strat.hidden = false;
-  } else {
-    strat.hidden = true;
+  if (tip.strategy) { strat.textContent = tip.strategy; strat.hidden = false; }
+  else { strat.hidden = true; }
+}
+
+function clearTutorialHighlights() {
+  for (const el of document.querySelectorAll('.tutorial-target')) {
+    el.classList.remove('tutorial-target');
   }
 }
 
+function applyTutorialHighlights(recommend) {
+  clearTutorialHighlights();
+  if (!recommend) return;
+  const mark = id => {
+    if (id == null) return;
+    for (const el of document.querySelectorAll(`[data-card-id="${id}"]`)) {
+      // Only highlight face-up copies (skip card back / CPU hand variants)
+      if (!el.classList.contains('face-down')) el.classList.add('tutorial-target');
+    }
+  };
+  mark(recommend.handCardId);
+  mark(recommend.fieldCardId);
+}
+
 export function tutorialReset() {
-  resetTutorial();
-  currentTipId = null;
+  currentTipSig = null;
 }
 
 function applyFLIP(prevRects, state) {
@@ -404,6 +419,7 @@ function renderYakuPanel(state) {
 
 function renderLog(state) {
   const el = $('#log');
+  const last = $('#log-last');
   const tail = state.log.slice(-20);
   const freshLines = Math.min(tail.length, Math.max(0, state.log.length - priorLogLength));
   priorLogLength = state.log.length;
@@ -413,6 +429,7 @@ function renderLog(state) {
     return `<div class="${cls}">${esc(line)}</div>`;
   }).join('');
   el.scrollTop = el.scrollHeight;
+  if (last) last.textContent = tail[tail.length - 1] || '';
 }
 
 function renderDialogs(state) {

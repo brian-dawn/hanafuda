@@ -5,6 +5,7 @@ import { CARDS } from './cards.js';
 import { createGame, playCard, chooseMatch, decideKoiKoi, nextHand } from './game.js';
 import { chooseMove, chooseMatchTarget, chooseKoiKoi } from './ai.js';
 import { createUI, registerCards, tutorialReset } from './ui.js';
+import { tutorialDeck } from './tutorial.js';
 
 registerCards(CARDS);
 
@@ -28,7 +29,13 @@ function rngFromUrl() {
 let tutorialActive = localStorage.getItem('koikoi-tutorial') === '1';
 
 function newGameState() {
-  const s = createGame({ rng: rngFromUrl() });
+  const opts = { rng: rngFromUrl() };
+  if (tutorialActive) {
+    // Only 1 hand for the tutorial — short and focused.
+    opts.deckOverride = tutorialDeck();
+    opts.maxHands = 1;
+  }
+  const s = createGame(opts);
   s.tutorialActive = tutorialActive;
   return s;
 }

@@ -105,7 +105,11 @@ async function runTutorial(browser) {
   await page.click('#tutorial-btn');
   await page.waitForSelector('#tutorial-bar:not([hidden])');
   const title = await page.textContent('#tutorial-title');
-  assert(title && title.toLowerCase().includes('welcome'), `tutorial opens with welcome tip, got "${title}"`);
+  assert(title && /boar/i.test(title), `tutorial starts by recommending Boar play, got "${title}"`);
+
+  // A card in player hand should be highlighted as the tutorial target
+  const highlighted = await page.$$('.card.tutorial-target');
+  assert(highlighted.length >= 1, `at least one card highlighted (${highlighted.length})`);
 
   // End tutorial button hides the bar
   await page.click('#tutorial-end');

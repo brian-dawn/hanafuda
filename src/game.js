@@ -24,7 +24,7 @@ export const MAX_HANDS = 3;
 
 // ----- creation --------------------------------------------------------
 
-export function createGame({ rng = Math.random, maxHands = MAX_HANDS, startingPlayer = 0 } = {}) {
+export function createGame({ rng = Math.random, maxHands = MAX_HANDS, startingPlayer = 0, deckOverride = null } = {}) {
   const s = dealHand({
     deck: [],
     field: [],
@@ -34,13 +34,14 @@ export function createGame({ rng = Math.random, maxHands = MAX_HANDS, startingPl
     pendingMatch: null,
     pendingDraw: null,
     koiKoi: [false, false],
-    yakuSnapshot: [[], []],  // yaku list at last check, per player
+    yakuSnapshot: [[], []],
     lastScore: null,
     scores: [0, 0],
     hand: 1,
     maxHands,
     log: [],
     rng,
+    deckOverride,
   });
   return s;
 }
@@ -50,19 +51,25 @@ function emptyPlayer() {
 }
 
 function dealHand(state) {
-  let deck = shuffledDeck(state.rng);
-  let players, field;
-
-  // Standard rule: if the field contains 4-of-a-month at deal time, reshuffle.
-  // Same applies if a player's hand contains 4-of-a-month (that's Teshi, which
-  // we score, but we still deal that way).
-  for (let tries = 0; tries < 10; tries++) {
-    const d = deck.slice();
+  // If caller supplied a fixed deck order (tutorial mode), use it verbatim
+  // and skip the shuffle-until-no-4-of-a-month loop.
+  let deck, players, field;
+  if (state.deckOverride && state.hand === 1) {
+    const d = state.deckOverride.slice();
     players = [{ hand: d.splice(0, HAND_SIZE), captures: [] },
                { hand: d.splice(0, HAND_SIZE), captures: [] }];
     field = d.splice(0, FIELD_SIZE);
-    if (!hasFourOfMonth(field)) { deck = d; break; }
+    deck = d;
+  } else {
     deck = shuffledDeck(state.rng);
+    for (let tries = 0; tries < 10; tries++) {
+      const d = deck.slice();
+      players = [{ hand: d.splice(0, HAND_SIZE), captures: [] },
+                 { hand: d.splice(0, HAND_SIZE), captures: [] }];
+      field = d.splice(0, FIELD_SIZE);
+      if (!hasFourOfMonth(field)) { deck = d; break; }
+      deck = shuffledDeck(state.rng);
+    }
   }
 
   const log = state.log.slice();
