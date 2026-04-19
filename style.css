@@ -1,49 +1,51 @@
 /* Koi-Koi web demo — build-less CSS.
- * Zen palette: muted greens/golds, no loud accents. Two themes swap
- * via [data-theme] on <html>. Animations are brief and decorative;
- * respect prefers-reduced-motion. */
+ * Palette: Flexoki by Steph Ango — warm neutrals for low eye strain,
+ * yellow + red accents. Two themes swap via [data-theme] on <html>.
+ * Animations are brief and decorative; respect prefers-reduced-motion. */
 
 :root,
 :root[data-theme="dark"] {
-  --bg:        #0c4a2f;
-  --bg-dark:   #083820;
-  --felt:      #146b3a;
-  --felt-lit:  #1a8246;
-  --gold:      #d4af37;
-  --red:       #b22222;
-  --fg:        #fafafa;
-  --fg-dim:    rgba(250,250,250,0.7);
-  --fg-faint:  rgba(250,250,250,0.15);
-  --ink:       #1a1a1a;
-  --panel-bg:  rgba(0,0,0,0.25);
-  --panel-border: rgba(255,255,255,0.1);
-  --lane-bg:   rgba(0,0,0,0.15);
-  --card-bg:   #fafafa;
-  --card-back: linear-gradient(135deg, #4a0e0e 25%, #660d0d 25%, #660d0d 50%, #4a0e0e 50%, #4a0e0e 75%, #660d0d 75%);
-  --deck-bg:   linear-gradient(135deg, #1a1a1a 25%, #2a2a2a 25%, #2a2a2a 50%, #1a1a1a 50%, #1a1a1a 75%, #2a2a2a 75%);
-  --shadow:    0 2px 6px rgba(0,0,0,0.4);
-  --shadow-lift: 0 8px 16px rgba(0,0,0,0.5);
+  /* Flexoki dark — paper-on-ink, warm greys. */
+  --bg:        #100F0F;      /* black */
+  --bg-dark:   #1C1B1A;      /* base-950 */
+  --felt:      #1C1B1A;      /* base-950, board surface */
+  --felt-lit:  #282726;      /* base-900 */
+  --gold:      #D0A215;      /* yellow-dark (Flexoki accent) */
+  --red:       #D14D41;      /* red-dark */
+  --fg:        #CECDC3;      /* base-200, body text */
+  --fg-dim:    #878580;      /* base-500 */
+  --fg-faint:  #403E3C;      /* base-800 */
+  --ink:       #100F0F;
+  --panel-bg:  #1C1B1A;      /* base-950 */
+  --panel-border: #343331;   /* base-850 */
+  --lane-bg:   #1C1B1A;
+  --card-bg:   #CECDC3;      /* base-200 — off-white card face */
+  --card-back: linear-gradient(135deg, #AF3029 25%, #D14D41 25%, #D14D41 50%, #AF3029 50%, #AF3029 75%, #D14D41 75%);
+  --deck-bg:   linear-gradient(135deg, #282726 25%, #343331 25%, #343331 50%, #282726 50%, #282726 75%, #343331 75%);
+  --shadow:    0 2px 6px rgba(0,0,0,0.6);
+  --shadow-lift: 0 8px 20px rgba(0,0,0,0.75);
 }
 
 :root[data-theme="light"] {
-  --bg:        #f4ecd8;
-  --bg-dark:   #e8dcbd;
-  --felt:      #d9c899;
-  --felt-lit:  #e5d9b4;
-  --gold:      #8a6a1c;
-  --red:       #8c1f1f;
-  --fg:        #2b2218;
-  --fg-dim:    rgba(43,34,24,0.65);
-  --fg-faint:  rgba(43,34,24,0.15);
-  --ink:       #fafafa;
-  --panel-bg:  rgba(255,255,255,0.5);
-  --panel-border: rgba(138,106,28,0.2);
-  --lane-bg:   rgba(255,255,255,0.35);
-  --card-bg:   #fffdf5;
-  --card-back: linear-gradient(135deg, #8c1f1f 25%, #a32929 25%, #a32929 50%, #8c1f1f 50%, #8c1f1f 75%, #a32929 75%);
-  --deck-bg:   linear-gradient(135deg, #3a2f22 25%, #4a3d2c 25%, #4a3d2c 50%, #3a2f22 50%, #3a2f22 75%, #4a3d2c 75%);
-  --shadow:    0 2px 6px rgba(0,0,0,0.15);
-  --shadow-lift: 0 8px 16px rgba(0,0,0,0.2);
+  /* Flexoki light — ink-on-paper. */
+  --bg:        #FFFCF0;      /* paper */
+  --bg-dark:   #F2F0E5;      /* base-50 */
+  --felt:      #E6E4D9;      /* base-100, board surface */
+  --felt-lit:  #DAD8CE;      /* base-150 */
+  --gold:      #AD8301;      /* yellow-light */
+  --red:       #AF3029;      /* red-light */
+  --fg:        #100F0F;      /* ink */
+  --fg-dim:    #6F6E69;      /* base-600 */
+  --fg-faint:  #CECDC3;      /* base-200 */
+  --ink:       #FFFCF0;
+  --panel-bg:  #F2F0E5;
+  --panel-border: #CECDC3;
+  --lane-bg:   #F2F0E5;
+  --card-bg:   #FFFCF0;
+  --card-back: linear-gradient(135deg, #AF3029 25%, #BC5215 25%, #BC5215 50%, #AF3029 50%, #AF3029 75%, #BC5215 75%);
+  --deck-bg:   linear-gradient(135deg, #403E3C 25%, #575653 25%, #575653 50%, #403E3C 50%, #403E3C 75%, #575653 75%);
+  --shadow:    0 2px 6px rgba(16,15,15,0.12);
+  --shadow-lift: 0 8px 16px rgba(16,15,15,0.18);
 }
 
 :root {
@@ -71,9 +73,9 @@ html, body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background: radial-gradient(ellipse at center, var(--felt) 0%, var(--bg-dark) 100%);
+  background: var(--bg);
   color: var(--fg);
-  font-family: 'Noto Serif JP', 'Georgia', serif;
+  font-family: 'Noto Serif JP', 'Iowan Old Style', 'Georgia', serif;
   transition: background 0.3s ease, color 0.3s ease;
 }
 
@@ -481,6 +483,84 @@ footer a { color: var(--gold); }
   letter-spacing: 0.05em;
 }
 .turn-indicator.opponent { background: var(--red); color: #fff; }
+
+/* -- Tooltip for card info -- */
+.tooltip {
+  position: fixed;
+  z-index: 50;
+  background: var(--panel-bg);
+  color: var(--fg);
+  border: 1px solid var(--panel-border);
+  border-left: 3px solid var(--gold);
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.8rem;
+  box-shadow: var(--shadow-lift);
+  pointer-events: none;
+  max-width: 240px;
+  animation: tooltip-in 0.15s ease-out;
+}
+.tooltip[hidden] { display: none; }
+.tooltip .tip-name   { font-weight: 700; color: var(--gold); margin-bottom: 0.25rem; }
+.tooltip .tip-month  { color: var(--fg-dim); font-size: 0.72rem; margin-bottom: 0.35rem; }
+.tooltip .tip-role   { margin-top: 0.3rem; }
+.tooltip .tip-role b { color: var(--gold); }
+.tooltip .tip-role .detail { color: var(--fg-dim); font-size: 0.72rem; display: block; }
+@keyframes tooltip-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* -- Help modal specifics -- */
+dialog.wide {
+  max-width: min(680px, 94vw);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+dialog .dialog-close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.5rem;
+  background: transparent;
+  color: var(--fg-dim);
+  font-size: 1.6rem;
+  line-height: 1;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 400;
+}
+dialog .dialog-close:hover { color: var(--fg); background: var(--felt-lit); }
+.help-content section { margin-bottom: 1rem; }
+.help-content h3 {
+  margin: 0.5rem 0 0.35rem 0;
+  color: var(--gold);
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+}
+.help-content ol, .help-content ul { margin: 0.25rem 0 0.5rem 1.1rem; padding: 0; }
+.help-content li { margin: 0.2rem 0; line-height: 1.45; }
+.help-content p { margin: 0.35rem 0; line-height: 1.5; }
+.yaku-ref {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin: 0.4rem 0;
+}
+.yaku-ref th, .yaku-ref td {
+  padding: 0.3rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--panel-border);
+}
+.yaku-ref th {
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+.yaku-ref td:last-child { text-align: right; color: var(--gold); font-weight: 700; white-space: nowrap; }
+.fine-print { color: var(--fg-dim); font-size: 0.78rem; font-style: italic; }
+.dialog-footer { display: flex; justify-content: flex-end; margin-top: 0.75rem; }
 
 /* Reduced-motion users get no decorative animation. */
 @media (prefers-reduced-motion: reduce) {

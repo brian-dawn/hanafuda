@@ -87,8 +87,49 @@ export const CARDS = [
 
 export const CARD_BY_ID = Object.fromEntries(CARDS.map(c => [c.id, c]));
 
+export const MONTH_NAMES = {
+  1: 'January · Pine',
+  2: 'February · Plum',
+  3: 'March · Cherry',
+  4: 'April · Wisteria',
+  5: 'May · Iris',
+  6: 'June · Peony',
+  7: 'July · Bush Clover',
+  8: 'August · Susuki',
+  9: 'September · Chrysanthemum',
+  10: 'October · Maple',
+  11: 'November · Willow',
+  12: 'December · Paulownia',
+};
+
 export function cardsByMonth(month) {
   return CARDS.filter(c => c.month === month);
+}
+
+// What role(s) this card plays in yaku. Used by the tooltip to teach the
+// player what each card is "worth". Ordered most-specific first.
+export function cardYakuRoles(card) {
+  const roles = [];
+  if (card.type === TYPES.HIKARI) {
+    roles.push({ label: 'Hikari (Bright)', detail: 'Counts toward Gokō / Shikō / Sankō.' });
+    if (card.rainman) roles.push({ label: 'Rain-Man', detail: 'Only counts for Ame-Shikō — blocks Shikō and Sankō.' });
+    if (card.moon)    roles.push({ label: 'Moon',    detail: 'Pairs with Sake Cup for Tsukimi-zake (5 pts).' });
+    if (card.cherry)  roles.push({ label: 'Cherry Curtain', detail: 'Pairs with Sake Cup for Hanami-zake (5 pts).' });
+  }
+  if (card.type === TYPES.TANE) {
+    roles.push({ label: 'Tane (Animal)', detail: '5+ Tane cards = 1 pt + 1/extra.' });
+    if (card.isc)  roles.push({ label: 'Ino-Shika-Chō', detail: 'Boar + Deer + Butterflies = 5 pts.' });
+    if (card.sake) roles.push({ label: 'Sake Cup', detail: 'Pairs with Moon (Tsukimi) or Cherry (Hanami) for 5 pts each.' });
+  }
+  if (card.type === TYPES.TANZAKU) {
+    roles.push({ label: 'Tan (Ribbon)', detail: '5+ Tan = 1 pt + 1/extra.' });
+    if (card.poetry) roles.push({ label: 'Poetry Ribbon', detail: 'All 3 = Akatan (5 pts).' });
+    if (card.blue)   roles.push({ label: 'Blue Ribbon',   detail: 'All 3 = Aotan (5 pts).' });
+  }
+  if (card.type === TYPES.KASU) {
+    roles.push({ label: 'Kasu (Chaff)', detail: '10+ Kasu = 1 pt + 1/extra.' });
+  }
+  return roles;
 }
 
 export function shuffledDeck(rng = Math.random) {

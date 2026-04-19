@@ -49,7 +49,7 @@ function assert(cond, msg) {
 }
 
 async function runScoringTests(browser) {
-  console.log('\n[1/3] scoring unit tests in browser');
+  console.log('\n[1/4] scoring unit tests in browser');
   const page = await browser.newPage();
   const consoleErrors = [];
   page.on('pageerror', e => consoleErrors.push(String(e)));
@@ -63,7 +63,7 @@ async function runScoringTests(browser) {
 }
 
 async function runGameSmoke(browser) {
-  console.log('\n[2/3] game smoke test with fixed seed');
+  console.log('\n[2/4] game smoke test with fixed seed');
   const page = await browser.newPage();
   const consoleErrors = [];
   const consoleLogs = [];
@@ -94,8 +94,35 @@ async function runGameSmoke(browser) {
   await page.close();
 }
 
+async function runHelpAndTooltip(browser) {
+  console.log('\n[3/4] help modal + tooltip');
+  const page = await browser.newPage();
+  const errs = [];
+  page.on('pageerror', e => errs.push(String(e)));
+  await page.goto(`http://localhost:${PORT}/?seed=3&fast=1`);
+  await page.waitForFunction(() => window.__koiKoi && window.__koiKoi.state);
+
+  // Help dialog opens + closes
+  await page.click('#help-btn');
+  await page.waitForSelector('#help-dialog[open]');
+  const title = await page.textContent('#help-dialog h2');
+  assert(title.toLowerCase().includes('how to play'), 'help dialog shows title');
+  await page.click('#btn-help-close');
+  await page.waitForFunction(() => !document.querySelector('#help-dialog[open]'));
+
+  // Tooltip appears on hover over a hand card
+  const firstCard = await page.$('#me-hand [data-card-id]');
+  await firstCard.hover();
+  await page.waitForSelector('#tooltip:not([hidden])');
+  const tipName = await page.textContent('#tooltip .tip-name');
+  assert(tipName && tipName.length > 2, `tooltip shows name "${tipName}"`);
+
+  assert(errs.length === 0, `no console errors (${errs.join('; ')})`);
+  await page.close();
+}
+
 async function runFullMatch(browser) {
-  console.log('\n[3/3] play a full 3-hand match');
+  console.log('\n[4/4] play a full 3-hand match');
   const page = await browser.newPage();
   const consoleErrors = [];
   page.on('pageerror', e => consoleErrors.push(String(e)));
@@ -180,6 +207,7 @@ async function main() {
     try {
       await runScoringTests(browser);
       await runGameSmoke(browser);
+      await runHelpAndTooltip(browser);
       await runFullMatch(browser);
     } finally {
       await browser.close();

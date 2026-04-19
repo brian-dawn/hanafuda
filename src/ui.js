@@ -1,7 +1,7 @@
 // DOM rendering for Koi-Koi. Rebuilds the relevant DOM subtrees on each
 // render() call; the state object is the source of truth.
 
-import { TYPES } from './cards.js';
+import { TYPES, MONTH_NAMES, cardYakuRoles } from './cards.js';
 import { scoreHand } from './scoring.js';
 
 const $ = sel => document.querySelector(sel);
@@ -23,9 +23,95 @@ export function createUI(handlers) {
   $('#btn-new-match').addEventListener('click', () => handlers.onNewMatch());
   $('#new-match').addEventListener('click', () => handlers.onNewMatch());
   $('#theme-toggle').addEventListener('click', toggleTheme);
+  wireHelpDialog();
+  wireTooltip();
 
   syncThemeIcon();
   return { render: state => render(state, handlers) };
+}
+
+function wireHelpDialog() {
+  const dlg = $('#help-dialog');
+  $('#help-btn').addEventListener('click', () => dlg.showModal());
+  $('#btn-help-close').addEventListener('click', () => dlg.close());
+  dlg.querySelector('.dialog-close')?.addEventListener('click', () => dlg.close());
+  // Clicking the backdrop closes too.
+  dlg.addEventListener('click', e => {
+    if (e.target === dlg) dlg.close();
+  });
+}
+
+// Card tooltip: shows card name, month, type, and yaku roles on hover.
+// Uses event delegation on document so it works even after re-renders.
+function wireTooltip() {
+  const tip = $('#tooltip');
+  let longPressTimer = null;
+
+  function showFor(el, ev) {
+    const id = el.dataset.cardId;
+    const card = CARDS_BY_ID_LOCAL.get(id);
+    if (!card) return;
+    tip.innerHTML = tooltipHTML(card);
+    tip.hidden = false;
+    positionTooltip(ev);
+  }
+  function positionTooltip(ev) {
+    const pad = 14;
+    const rect = tip.getBoundingClientRect();
+    let x = ev.clientX + pad;
+    let y = ev.clientY + pad;
+    if (x + rect.width > window.innerWidth - 4) x = ev.clientX - rect.width - pad;
+    if (y + rect.height > window.innerHeight - 4) y = ev.clientY - rect.height - pad;
+    tip.style.left = Math.max(4, x) + 'px';
+    tip.style.top  = Math.max(4, y) + 'px';
+  }
+  function hide() { tip.hidden = true; }
+
+  document.addEventListener('mouseover', ev => {
+    const el = ev.target.closest('[data-card-id]');
+    if (!el || el.classList.contains('face-down')) { hide(); return; }
+    showFor(el, ev);
+  });
+  document.addEventListener('mousemove', ev => {
+    if (!tip.hidden) positionTooltip(ev);
+  });
+  document.addEventListener('mouseout', ev => {
+    if (!ev.relatedTarget || !ev.relatedTarget.closest?.('[data-card-id]')) hide();
+  });
+
+  // Long-press on touch for card info.
+  document.addEventListener('touchstart', ev => {
+    const el = ev.target.closest('[data-card-id]');
+    if (!el || el.classList.contains('face-down')) return;
+    longPressTimer = setTimeout(() => {
+      const t = ev.touches[0];
+      showFor(el, { clientX: t.clientX, clientY: t.clientY });
+      // auto-hide after a while
+      setTimeout(hide, 3000);
+    }, 450);
+  }, { passive: true });
+  document.addEventListener('touchend', () => {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  });
+  document.addEventListener('touchmove', () => {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  });
+}
+
+// Populated lazily so we don't circular-import CARD_BY_ID.
+const CARDS_BY_ID_LOCAL = new Map();
+export function registerCards(cards) {
+  for (const c of cards) CARDS_BY_ID_LOCAL.set(String(c.id), c);
+}
+
+function tooltipHTML(card) {
+  const roles = cardYakuRoles(card);
+  const rolesHTML = roles.map(r => `<div class="tip-role"><b>${esc(r.label)}</b><span class="detail">${esc(r.detail)}</span></div>`).join('');
+  return `
+    <div class="tip-name">${esc(card.name)}</div>
+    <div class="tip-month">${esc(MONTH_NAMES[card.month] || '')}</div>
+    ${rolesHTML}
+  `;
 }
 
 function toggleTheme() {
@@ -179,7 +265,6 @@ function cardEl(card, opts) {
     el.appendChild(ph);
   };
   el.appendChild(img);
-  el.title = card.name;
   if (opts.clickable) {
     el.classList.add('selectable');
     el.addEventListener('click', () => opts.onClick(card.id));

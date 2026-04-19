@@ -1,9 +1,12 @@
 // Entry point: owns the game state, wires UI events to game transitions,
 // and drives the AI turn automatically.
 
+import { CARDS } from './cards.js';
 import { createGame, playCard, chooseMatch, decideKoiKoi, nextHand } from './game.js';
 import { chooseMove, chooseMatchTarget, chooseKoiKoi } from './ai.js';
-import { createUI } from './ui.js';
+import { createUI, registerCards } from './ui.js';
+
+registerCards(CARDS);
 
 // URL ?fast=1 collapses animations for automated tests.
 const params = new URLSearchParams(location.search);

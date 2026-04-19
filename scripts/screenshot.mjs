@@ -1,9 +1,10 @@
 // Take screenshots of both themes at desktop + mobile sizes for review.
+// Also captures the Help dialog and a hovered-card tooltip state.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import url from 'node:url';
-import { chromium, devices } from 'playwright';
+import { chromium } from 'playwright';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -47,5 +48,37 @@ for (const vp of viewports) {
     await page.close();
   }
 }
+
+// Help dialog, desktop, dark
+{
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await page.addInitScript(t => localStorage.setItem('koikoi-theme', t), 'dark');
+  await page.goto(`http://localhost:${PORT}/?seed=11&fast=1`);
+  await page.waitForFunction(() => window.__koiKoi && window.__koiKoi.state);
+  await page.click('#help-btn');
+  await page.waitForSelector('#help-dialog[open]');
+  await page.waitForTimeout(200);
+  const out = path.join(ROOT, 'screenshot-help-dark.png');
+  await page.screenshot({ path: out, fullPage: false });
+  console.log(`wrote ${out}`);
+  await page.close();
+}
+
+// Tooltip, desktop, dark
+{
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await page.addInitScript(t => localStorage.setItem('koikoi-theme', t), 'dark');
+  await page.goto(`http://localhost:${PORT}/?seed=11&fast=1`);
+  await page.waitForFunction(() => window.__koiKoi && window.__koiKoi.state);
+  const card = await page.$('#me-hand [data-card-id]');
+  await card.hover();
+  await page.waitForSelector('#tooltip:not([hidden])');
+  await page.waitForTimeout(200);
+  const out = path.join(ROOT, 'screenshot-tooltip-dark.png');
+  await page.screenshot({ path: out });
+  console.log(`wrote ${out}`);
+  await page.close();
+}
+
 await browser.close();
 server.close();

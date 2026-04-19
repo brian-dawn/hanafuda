@@ -24,6 +24,7 @@
     <h1>花札 <span class="subtitle">Koi-Koi</span></h1>
     <div class="scoreboard" id="scoreboard"></div>
     <div class="header-actions">
+      <button id="help-btn" type="button" class="ghost" title="How to play">?</button>
       <button id="theme-toggle" type="button" class="ghost" title="Toggle theme"><span id="theme-icon">☾</span></button>
       <button id="new-match" type="button">New Match</button>
     </div>
@@ -74,6 +75,69 @@
     <h2 id="handover-title">Hand Over</h2>
     <div id="handover-body"></div>
     <button id="btn-next-hand" type="button">Next Hand</button>
+  </dialog>
+
+  <div id="tooltip" class="tooltip" hidden></div>
+
+  <dialog id="help-dialog" class="wide">
+    <button type="button" class="dialog-close" aria-label="close">×</button>
+    <h2>How to play Koi-Koi</h2>
+    <div class="help-content">
+      <section>
+        <h3>Object</h3>
+        <p>Match cards by their <b>month</b> (the plant on the card) to capture them into your pile. Certain capture combinations are <b>yaku</b> (scoring patterns). After each yaku you form, decide whether to stop (<b>Agari</b>) and lock in your score, or gamble on more by calling <b>Koi-Koi</b>.</p>
+      </section>
+      <section>
+        <h3>Turn</h3>
+        <ol>
+          <li>Play one card from your hand. If it matches a field card's month, you capture both. If 2 field cards match, you pick one.</li>
+          <li>Flip the top of the deck. Same rule: match one field card and capture; if it doesn't match, it lies on the field.</li>
+          <li>If you just formed a new yaku, you are prompted: <b>Agari</b> (score now) or <b>Koi-Koi</b> (continue — but if your opponent scores next, their points double).</li>
+        </ol>
+      </section>
+      <section>
+        <h3>Card types</h3>
+        <p>Each month has four cards, divided into four categories:</p>
+        <ul>
+          <li><b>Hikari</b> (Brights, 5 in deck) — for Gokō / Shikō / Sankō.</li>
+          <li><b>Tane</b> (Animals, 9 in deck) — 5+ = 1 pt, +1 each extra.</li>
+          <li><b>Tan</b> (Ribbons, 10 in deck) — 5+ = 1 pt, +1 each extra.</li>
+          <li><b>Kasu</b> (Chaff, 24 in deck) — 10+ = 1 pt, +1 each extra.</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Yaku reference</h3>
+        <table class="yaku-ref">
+          <thead><tr><th>Yaku</th><th>Cards</th><th>Pts</th></tr></thead>
+          <tbody>
+            <tr><td>Gokō (Five Brights)</td><td>All 5 Hikari</td><td>10</td></tr>
+            <tr><td>Shikō (Four Brights)</td><td>4 Hikari, <i>without</i> Rain-Man</td><td>8</td></tr>
+            <tr><td>Ame-Shikō (Rainy 4)</td><td>4 Hikari <i>including</i> Rain-Man</td><td>7</td></tr>
+            <tr><td>Sankō (Three Brights)</td><td>3 Hikari, no Rain-Man</td><td>5</td></tr>
+            <tr><td>Ino-Shika-Chō</td><td>Boar + Deer + Butterflies</td><td>5</td></tr>
+            <tr><td>Tane</td><td>5+ animal cards</td><td>1 + 1/extra</td></tr>
+            <tr><td>Akatan (Red Poetry)</td><td>Jan + Feb + Mar ribbons</td><td>5</td></tr>
+            <tr><td>Aotan (Blue)</td><td>Jun + Sep + Oct ribbons</td><td>5</td></tr>
+            <tr><td>Tan</td><td>5+ ribbon cards</td><td>1 + 1/extra</td></tr>
+            <tr><td>Kasu</td><td>10+ plain cards</td><td>1 + 1/extra</td></tr>
+            <tr><td>Tsukimi-zake</td><td>Moon + Sake cup</td><td>5</td></tr>
+            <tr><td>Hanami-zake</td><td>Cherry Curtain + Sake cup</td><td>5</td></tr>
+            <tr><td>Teshi (hand)</td><td>4 of one month in opening hand</td><td>6</td></tr>
+            <tr><td>Kuttsuki (hand)</td><td>4 pairs in opening hand</td><td>6</td></tr>
+          </tbody>
+        </table>
+        <p class="fine-print">Any yaku total of 7+ is <b>doubled</b>. If either player called Koi-Koi during the hand, the final score is also doubled (they stack).</p>
+      </section>
+      <section>
+        <h3>Tips</h3>
+        <ul>
+          <li><b>Hover a card</b> (or tap-and-hold on mobile) to see its role in yaku.</li>
+          <li>Call Koi-Koi when you're behind or have a clear path to a 7+ yaku.</li>
+          <li>Agari when your opponent is close to scoring or your hand is running out.</li>
+        </ul>
+      </section>
+    </div>
+    <div class="dialog-footer"><button id="btn-help-close" type="button">Got it</button></div>
   </dialog>
 
   <dialog id="matchover-dialog">
