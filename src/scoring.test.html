@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Koi-Koi scoring tests</title>
+  <style>
+    body { font-family: monospace; padding: 1rem; background: #1a1a1a; color: #eee; }
+    .pass { color: #6f6; }
+    .fail { color: #f66; font-weight: bold; }
+    h1 { color: #fd0; }
+    summary { cursor: pointer; }
+  </style>
+</head>
+<body>
+<h1>Koi-Koi scoring tests</h1>
+<pre id="out"></pre>
+<script type="module">
+import { CARDS, CARD_BY_ID } from './cards.js';
+import { scoreHand, scoreInitialHand } from './scoring.js';
+
+const out = document.getElementById('out');
+let pass = 0, fail = 0;
+
+function log(line, cls = '') {
+  const span = document.createElement('span');
+  if (cls) span.className = cls;
+  span.textContent = line + '\n';
+  out.appendChild(span);
+}
+function check(name, actual, expected) {
+  const a = JSON.stringify(actual);
+  const e = JSON.stringify(expected);
+  if (a === e) { pass++; log(`PASS ${name}`, 'pass'); }
+  else { fail++; log(`FAIL ${name}\n     actual:   ${a}\n     expected: ${e}`, 'fail'); }
+}
+
+function ids(...xs) { return xs.map(id => CARD_BY_ID[id]); }
+
+// -- Hikari yaku --
+check('Gokō', scoreHand(ids(0, 8, 28, 40, 44)).yaku,
+  [{ name: 'Gokō', points: 10 }]);
+
+check('Shikō (no rain)', scoreHand(ids(0, 8, 28, 44)).yaku,
+  [{ name: 'Shikō', points: 8 }]);
+
+check('Ame-Shikō (with rain)', scoreHand(ids(0, 8, 40, 44)).yaku,
+  [{ name: 'Ame-Shikō', points: 7 }]);
+
+check('Sankō (3 brights, no rain)', scoreHand(ids(0, 8, 44)).yaku,
+  [{ name: 'Sankō', points: 5 }]);
+
+check('3 brights with rain = no sankō', scoreHand(ids(0, 40, 44)).yaku,
+  []);
+
+// -- Ino-Shika-Chō --
+check('Ino-Shika-Chō', scoreHand(ids(20, 24, 36)).yaku,
+  [{ name: 'Ino-Shika-Chō', points: 5 }]);
+
+check('Missing one of ISC = no yaku', scoreHand(ids(20, 24)).yaku,
+  []);
+
+// -- Tane count --
+check('Tane 5 = 1pt', scoreHand(ids(4, 12, 16, 29, 41)).yaku,
+  [{ name: 'Tane', points: 1 }]);
+
+check('Tane 6 = 2pts', scoreHand(ids(4, 12, 16, 29, 41, 32)).yaku,
+  [{ name: 'Tane', points: 2 }]);
+
+check('Tane 4 = nothing', scoreHand(ids(4, 12, 16, 29)).yaku, []);
+
+// -- Ribbons --
+check('Akatan', scoreHand(ids(1, 5, 9)).yaku,
+  [{ name: 'Akatan', points: 5 }]);
+
+check('Aotan', scoreHand(ids(21, 33, 37)).yaku,
+  [{ name: 'Aotan', points: 5 }]);
+
+check('Tan 5', scoreHand(ids(1, 5, 9, 13, 17)).yaku.find(y => y.name === 'Tan'),
+  { name: 'Tan', points: 1 });
+
+check('Tan 6 = 2pts', scoreHand(ids(1, 5, 9, 13, 17, 25)).yaku.find(y => y.name === 'Tan'),
+  { name: 'Tan', points: 2 });
+
+// Akatan + Tan stacking
+const aka = scoreHand(ids(1, 5, 9, 13, 17));
+check('Akatan stacks with Tan', aka.yaku.map(y => y.name).sort(),
+  ['Akatan', 'Tan']);
+
+// -- Kasu --
+check('Kasu 10 = 1pt', scoreHand(ids(2,3,6,7,10,11,14,15,18,19)).yaku,
+  [{ name: 'Kasu', points: 1 }]);
+
+check('Kasu 11 = 2pts', scoreHand(ids(2,3,6,7,10,11,14,15,18,19,22)).yaku,
+  [{ name: 'Kasu', points: 2 }]);
+
+// -- Seasonal --
+check('Tsukimi-zake', scoreHand(ids(28, 32)).yaku.some(y => y.name === 'Tsukimi-zake'),
+  true);
+
+check('Hanami-zake', scoreHand(ids(8, 32)).yaku.some(y => y.name === 'Hanami-zake'),
+  true);
+
+// -- Doubling --
+const big = scoreHand(ids(0, 8, 28, 40, 44));  // Gokō = 10
+check('Gokō doubled for 20', big.total, 20);
+check('Gokō flagged doubled', big.doubled, true);
+
+const small = scoreHand(ids(20, 24, 36));  // ISC = 5
+check('ISC not doubled', small.total, 5);
+
+// -- Hand yaku --
+// Teshi: 4 of same month (e.g., Jan x4: ids 0,1,2,3) — fill rest from different months
+check('Teshi detected',
+  scoreInitialHand(ids(0, 1, 2, 3, 4, 12, 16, 20)),
+  { name: 'Teshi', points: 6 });
+
+// Kuttsuki: 4 pairs — 2 of each of 4 months
+check('Kuttsuki detected',
+  scoreInitialHand(ids(0, 1, 4, 5, 8, 9, 12, 13)),
+  { name: 'Kuttsuki', points: 6 });
+
+// Normal hand
+check('Normal hand, no hand yaku',
+  scoreInitialHand(ids(0, 4, 8, 12, 16, 20, 24, 28)),
+  null);
+
+// -- Summary --
+log(`\n${pass} passed, ${fail} failed`, fail ? 'fail' : 'pass');
+document.title = `${pass} pass / ${fail} fail`;
+window.__testResult = { pass, fail };
+</script>
+</body>
+</html>
