@@ -9,10 +9,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Cinzel:wght@600&display=swap" rel="stylesheet">
 </head>
 <body>
+  <script>
+    // Apply saved theme before any paint to avoid a flash.
+    (function () {
+      const saved = localStorage.getItem('koikoi-theme');
+      if (saved === 'light' || saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', saved);
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
   <header>
     <h1>花札 <span class="subtitle">Koi-Koi</span></h1>
     <div class="scoreboard" id="scoreboard"></div>
-    <button id="new-match" type="button">New Match</button>
+    <div class="header-actions">
+      <button id="theme-toggle" type="button" class="ghost" title="Toggle theme"><span id="theme-icon">☾</span></button>
+      <button id="new-match" type="button">New Match</button>
+    </div>
   </header>
 
   <main id="board">

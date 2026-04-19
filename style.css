@@ -1,18 +1,55 @@
-/* Koi-Koi web demo — build-less CSS. */
+/* Koi-Koi web demo — build-less CSS.
+ * Zen palette: muted greens/golds, no loud accents. Two themes swap
+ * via [data-theme] on <html>. Animations are brief and decorative;
+ * respect prefers-reduced-motion. */
+
+:root,
+:root[data-theme="dark"] {
+  --bg:        #0c4a2f;
+  --bg-dark:   #083820;
+  --felt:      #146b3a;
+  --felt-lit:  #1a8246;
+  --gold:      #d4af37;
+  --red:       #b22222;
+  --fg:        #fafafa;
+  --fg-dim:    rgba(250,250,250,0.7);
+  --fg-faint:  rgba(250,250,250,0.15);
+  --ink:       #1a1a1a;
+  --panel-bg:  rgba(0,0,0,0.25);
+  --panel-border: rgba(255,255,255,0.1);
+  --lane-bg:   rgba(0,0,0,0.15);
+  --card-bg:   #fafafa;
+  --card-back: linear-gradient(135deg, #4a0e0e 25%, #660d0d 25%, #660d0d 50%, #4a0e0e 50%, #4a0e0e 75%, #660d0d 75%);
+  --deck-bg:   linear-gradient(135deg, #1a1a1a 25%, #2a2a2a 25%, #2a2a2a 50%, #1a1a1a 50%, #1a1a1a 75%, #2a2a2a 75%);
+  --shadow:    0 2px 6px rgba(0,0,0,0.4);
+  --shadow-lift: 0 8px 16px rgba(0,0,0,0.5);
+}
+
+:root[data-theme="light"] {
+  --bg:        #f4ecd8;
+  --bg-dark:   #e8dcbd;
+  --felt:      #d9c899;
+  --felt-lit:  #e5d9b4;
+  --gold:      #8a6a1c;
+  --red:       #8c1f1f;
+  --fg:        #2b2218;
+  --fg-dim:    rgba(43,34,24,0.65);
+  --fg-faint:  rgba(43,34,24,0.15);
+  --ink:       #fafafa;
+  --panel-bg:  rgba(255,255,255,0.5);
+  --panel-border: rgba(138,106,28,0.2);
+  --lane-bg:   rgba(255,255,255,0.35);
+  --card-bg:   #fffdf5;
+  --card-back: linear-gradient(135deg, #8c1f1f 25%, #a32929 25%, #a32929 50%, #8c1f1f 50%, #8c1f1f 75%, #a32929 75%);
+  --deck-bg:   linear-gradient(135deg, #3a2f22 25%, #4a3d2c 25%, #4a3d2c 50%, #3a2f22 50%, #3a2f22 75%, #4a3d2c 75%);
+  --shadow:    0 2px 6px rgba(0,0,0,0.15);
+  --shadow-lift: 0 8px 16px rgba(0,0,0,0.2);
+}
 
 :root {
-  --bg: #0c4a2f;
-  --bg-dark: #083820;
-  --felt: #146b3a;
-  --felt-lit: #1a8246;
-  --gold: #d4af37;
-  --red: #b22222;
-  --white: #fafafa;
-  --ink: #1a1a1a;
   --card-w: 64px;
   --card-h: 104px;
   --card-radius: 6px;
-  --shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
 * { box-sizing: border-box; }
@@ -22,8 +59,9 @@ html, body {
   padding: 0;
   min-height: 100vh;
   background: radial-gradient(ellipse at center, var(--felt) 0%, var(--bg-dark) 100%);
-  color: var(--white);
+  color: var(--fg);
   font-family: 'Noto Serif JP', 'Georgia', serif;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 header {
@@ -31,9 +69,10 @@ header {
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 1.25rem;
-  background: rgba(0,0,0,0.35);
+  background: var(--panel-bg);
   border-bottom: 2px solid var(--gold);
 }
+.header-actions { display: flex; gap: 0.5rem; }
 h1 {
   margin: 0;
   font-size: 1.6rem;
@@ -44,7 +83,7 @@ h1 .subtitle {
   font-family: 'Cinzel', serif;
   font-size: 1.1rem;
   margin-left: 0.5rem;
-  color: var(--white);
+  color: var(--fg);
   opacity: 0.8;
 }
 
@@ -58,7 +97,7 @@ h1 .subtitle {
   gap: 0.5rem;
   align-items: center;
 }
-.scoreboard .score .name { opacity: 0.7; }
+.scoreboard .score .name { color: var(--fg-dim); }
 .scoreboard .score .value {
   font-weight: 700;
   color: var(--gold);
@@ -98,15 +137,16 @@ main#board {
 
 .lane {
   padding: 0.5rem;
-  background: rgba(0,0,0,0.15);
+  background: var(--lane-bg);
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--panel-border);
+  transition: background 0.3s ease;
 }
 .lane-label {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  opacity: 0.6;
+  color: var(--fg-dim);
   margin-bottom: 0.25rem;
 }
 .lane-you .lane-label { margin-top: 0.25rem; margin-bottom: 0; }
@@ -137,7 +177,7 @@ main#board {
   width: var(--card-w);
   height: var(--card-h);
   border-radius: var(--card-radius);
-  background: linear-gradient(135deg, #1a1a1a 25%, #2a2a2a 25%, #2a2a2a 50%, #1a1a1a 50%, #1a1a1a 75%, #2a2a2a 75%);
+  background: var(--deck-bg);
   background-size: 10px 10px;
   border: 2px solid var(--gold);
   box-shadow: var(--shadow);
@@ -156,7 +196,7 @@ main#board {
 .deck.empty { opacity: 0.3; border-style: dashed; }
 .deck-count {
   font-size: 0.85rem;
-  opacity: 0.75;
+  color: var(--fg-dim);
 }
 
 .field {
@@ -165,9 +205,10 @@ main#board {
   gap: 0.4rem;
   min-height: calc(var(--card-h) * 2 + 0.8rem);
   padding: 0.5rem;
-  background: rgba(0,0,0,0.2);
+  background: var(--panel-bg);
   border-radius: 8px;
-  border: 1px dashed rgba(255,255,255,0.15);
+  border: 1px dashed var(--fg-faint);
+  transition: background 0.3s ease;
 }
 .field .card.matchable {
   outline: 3px solid var(--gold);
@@ -179,12 +220,25 @@ main#board {
   width: var(--card-w);
   height: var(--card-h);
   border-radius: var(--card-radius);
-  background: var(--white);
+  background: var(--card-bg);
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
   user-select: none;
-  transition: transform 0.1s, box-shadow 0.1s;
+  will-change: transform;
+  transition: box-shadow 0.2s ease;
+}
+.card.hover-lift {
+  transition: box-shadow 0.2s ease;
+}
+/* FLIP: applied inline by JS when a card changes position. */
+.card.flipping { transition: transform 0.45s cubic-bezier(0.22, 0.8, 0.32, 1); }
+.card.fresh-capture {
+  animation: capture-glow 0.6s ease-out;
+}
+@keyframes capture-glow {
+  0%   { box-shadow: 0 0 0 4px rgba(212,175,55,0.85), var(--shadow); }
+  100% { box-shadow: 0 0 0 0 rgba(212,175,55,0),    var(--shadow); }
 }
 .card img {
   width: 100%;
@@ -193,9 +247,9 @@ main#board {
   display: block;
 }
 .card.face-down {
-  background: linear-gradient(135deg, #4a0e0e 25%, #660d0d 25%, #660d0d 50%, #4a0e0e 50%, #4a0e0e 75%, #660d0d 75%);
+  background: var(--card-back);
   background-size: 10px 10px;
-  border: 1px solid #2a0a0a;
+  border: 1px solid rgba(0,0,0,0.5);
 }
 .card.face-down::after {
   content: '';
@@ -206,12 +260,19 @@ main#board {
 }
 .card.selectable:hover {
   transform: translateY(-6px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-lift);
 }
 .card.selected {
   transform: translateY(-12px);
   outline: 3px solid var(--gold);
   outline-offset: 2px;
+}
+.card.matchable {
+  animation: matchable-pulse 1.4s ease-in-out infinite;
+}
+@keyframes matchable-pulse {
+  0%, 100% { outline-offset: 2px; }
+  50%      { outline-offset: 5px; }
 }
 .card .placeholder {
   background: linear-gradient(135deg, #fff7e6 0%, #f0e5c8 100%);
@@ -238,14 +299,14 @@ main#board {
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.25rem 0.5rem;
-  background: rgba(0,0,0,0.15);
+  background: var(--lane-bg);
   border-radius: 6px;
   min-width: 70px;
 }
 .capture-group-label {
   font-size: 0.65rem;
   text-transform: uppercase;
-  opacity: 0.6;
+  color: var(--fg-dim);
   letter-spacing: 0.1em;
 }
 .capture-group-cards {
@@ -267,10 +328,11 @@ main#board {
   max-height: 100%;
 }
 .panel {
-  background: rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 8px;
   padding: 0.6rem 0.75rem;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 .panel h2 {
   margin: 0 0 0.35rem 0;
@@ -283,7 +345,7 @@ main#board {
 .yaku-player { font-weight: 700; opacity: 0.7; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.25rem; }
 .yaku-item { display: flex; justify-content: space-between; }
 .yaku-item .points { color: var(--gold); font-weight: 700; }
-.yaku-total { display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.15); margin-top: 0.25rem; padding-top: 0.25rem; font-weight: 700; }
+.yaku-total { display: flex; justify-content: space-between; border-top: 1px solid var(--fg-faint); margin-top: 0.25rem; padding-top: 0.25rem; font-weight: 700; }
 .yaku-total .points { color: var(--gold); }
 
 #log {
@@ -291,8 +353,13 @@ main#board {
   font-family: 'Menlo', 'Monaco', monospace;
   max-height: 160px;
   overflow-y: auto;
-  opacity: 0.85;
+  color: var(--fg-dim);
   line-height: 1.4;
+}
+#log > div.log-new { animation: log-in 0.25s ease-out; }
+@keyframes log-in {
+  from { opacity: 0; transform: translateX(-4px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 #log .log-hand-header { color: var(--gold); font-weight: 700; }
 
@@ -300,14 +367,20 @@ dialog {
   border: 2px solid var(--gold);
   border-radius: 10px;
   background: var(--bg-dark);
-  color: var(--white);
+  color: var(--fg);
   padding: 1.25rem 1.5rem;
   font-family: inherit;
   min-width: 340px;
   max-width: 500px;
+  animation: dialog-in 0.25s ease-out;
+}
+@keyframes dialog-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
 }
 dialog::backdrop {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
 }
 dialog h2 {
   margin-top: 0;
@@ -325,7 +398,7 @@ dialog h2 {
 footer {
   padding: 0.5rem 1.25rem;
   font-size: 0.8rem;
-  opacity: 0.7;
+  color: var(--fg-dim);
 }
 footer a { color: var(--gold); }
 
@@ -344,4 +417,12 @@ footer a { color: var(--gold); }
   box-shadow: var(--shadow);
   letter-spacing: 0.05em;
 }
-.turn-indicator.opponent { background: var(--red); color: var(--white); }
+.turn-indicator.opponent { background: var(--red); color: #fff; }
+
+/* Reduced-motion users get no decorative animation. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+  }
+}

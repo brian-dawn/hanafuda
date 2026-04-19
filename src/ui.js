@@ -22,11 +22,38 @@ export function createUI(handlers) {
   $('#btn-next-hand').addEventListener('click', () => handlers.onNextHand());
   $('#btn-new-match').addEventListener('click', () => handlers.onNewMatch());
   $('#new-match').addEventListener('click', () => handlers.onNewMatch());
+  $('#theme-toggle').addEventListener('click', toggleTheme);
 
+  syncThemeIcon();
   return { render: state => render(state, handlers) };
 }
 
+function toggleTheme() {
+  const curr = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = curr === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('koikoi-theme', next);
+  syncThemeIcon();
+}
+
+function syncThemeIcon() {
+  const icon = $('#theme-icon');
+  if (!icon) return;
+  const curr = document.documentElement.getAttribute('data-theme') || 'dark';
+  icon.textContent = curr === 'dark' ? '☾' : '☀';
+}
+
+// Track the previous card locations so captured/moved cards can be
+// identified and glow briefly after moving.
+let priorCardParents = new Map();  // cardId -> parent container dataset.zone
+let priorLogLength = 0;
+
 function render(state, handlers) {
+  // --- FLIP: record old positions before DOM rebuild ---
+  const prevRects = new Map();
+  for (const el of document.querySelectorAll('[data-card-id]')) {
+    prevRects.set(el.dataset.cardId, el.getBoundingClientRect());
+  }
   renderTurnIndicator(state);
   renderScoreboard(state);
   renderHand('#opp-hand', state.players[1].hand, { faceDown: true });
@@ -42,6 +69,54 @@ function render(state, handlers) {
   renderYakuPanel(state);
   renderLog(state);
   renderDialogs(state);
+
+  applyFLIP(prevRects, state);
+}
+
+function applyFLIP(prevRects, state) {
+  // Figure out which cards are now in captures that weren't before —
+  // those get a capture-glow highlight.
+  const newParents = new Map();
+  for (const el of document.querySelectorAll('[data-card-id]')) {
+    const id = el.dataset.cardId;
+    const zone = el.closest('[data-zone]')?.dataset.zone || '';
+    newParents.set(id, zone);
+  }
+
+  for (const el of document.querySelectorAll('[data-card-id]')) {
+    const id = el.dataset.cardId;
+    const prev = prevRects.get(id);
+    // Flag freshly moved into captures (for the glow)
+    const newZone = newParents.get(id);
+    const oldZone = priorCardParents.get(id);
+    if (newZone && newZone.startsWith('cap-') && oldZone !== newZone) {
+      el.classList.add('fresh-capture');
+      setTimeout(() => el.classList.remove('fresh-capture'), 700);
+    }
+    if (!prev) continue;  // new card with no prior position — skip animation
+    const now = el.getBoundingClientRect();
+    const dx = prev.left - now.left;
+    const dy = prev.top - now.top;
+    const ds = prev.width && now.width ? prev.width / now.width : 1;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(ds - 1) < 0.02) continue;
+
+    // Start at prior position (inverted), then release to new.
+    el.classList.remove('flipping');
+    el.style.transformOrigin = '0 0';
+    el.style.transform = `translate(${dx}px, ${dy}px) scale(${ds})`;
+    // Force reflow so the starting transform is committed.
+    void el.offsetWidth;
+    el.classList.add('flipping');
+    el.style.transform = '';
+    // Clean up
+    setTimeout(() => {
+      el.classList.remove('flipping');
+      el.style.transform = '';
+      el.style.transformOrigin = '';
+    }, 500);
+  }
+
+  priorCardParents = newParents;
 }
 
 function renderTurnIndicator(state) {
@@ -75,14 +150,10 @@ function renderScoreboard(state) {
 
 function renderHand(sel, cards, opts) {
   const el = $(sel);
+  el.dataset.zone = sel === '#me-hand' ? 'hand-me' : 'hand-opp';
   el.innerHTML = '';
-  const n = opts.faceDown ? cards.length : cards.length;
   for (const card of cards) {
     el.appendChild(cardEl(card, opts));
-  }
-  // Pad face-down hand to hand size so the row stays wide
-  if (opts.faceDown) {
-    // nothing; just render the cards we know about
   }
 }
 
@@ -118,6 +189,7 @@ function cardEl(card, opts) {
 
 function renderCaptures(sel, cards) {
   const el = $(sel);
+  const who = sel === '#me-captures' ? 'me' : 'opp';
   el.innerHTML = '';
   if (cards.length === 0) { el.classList.add('empty'); }
   else { el.classList.remove('empty'); }
@@ -125,6 +197,7 @@ function renderCaptures(sel, cards) {
     const group = document.createElement('div');
     group.className = 'capture-group';
     group.dataset.group = g.key;
+    group.dataset.zone = `cap-${who}-${g.key}`;
     const label = document.createElement('div');
     label.className = 'capture-group-label';
     label.textContent = g.label;
@@ -142,6 +215,7 @@ function renderCaptures(sel, cards) {
 
 function renderField(state, handlers) {
   const el = $('#field');
+  el.dataset.zone = 'field';
   el.innerHTML = '';
   // Highlight matchable cards when user is picking a field card.
   let pending = null;
@@ -205,11 +279,13 @@ function renderYakuPanel(state) {
 
 function renderLog(state) {
   const el = $('#log');
-  el.innerHTML = state.log.slice(-20).map(line => {
-    if (line.startsWith('—')) {
-      return `<div class="log-hand-header">${esc(line)}</div>`;
-    }
-    return `<div>${esc(line)}</div>`;
+  const tail = state.log.slice(-20);
+  const freshLines = Math.min(tail.length, Math.max(0, state.log.length - priorLogLength));
+  priorLogLength = state.log.length;
+  el.innerHTML = tail.map((line, i) => {
+    const isNew = i >= tail.length - freshLines;
+    const cls = (line.startsWith('—') ? 'log-hand-header ' : '') + (isNew ? 'log-new' : '');
+    return `<div class="${cls}">${esc(line)}</div>`;
   }).join('');
   el.scrollTop = el.scrollHeight;
 }
