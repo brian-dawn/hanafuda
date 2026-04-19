@@ -104,14 +104,23 @@ async function runTutorial(browser) {
 
   await page.click('#tutorial-btn');
   await page.waitForSelector('#tutorial-bar:not([hidden])');
-  const title = await page.textContent('#tutorial-title');
-  assert(title && /boar/i.test(title), `tutorial starts by recommending Boar play, got "${title}"`);
+  const introTitle = await page.textContent('#tutorial-title');
+  assert(/welcome/i.test(introTitle), `tutorial starts with welcome intro, got "${introTitle}"`);
 
-  // A card in player hand should be highlighted as the tutorial target
+  // Step indicator should read "Lesson 1 of N"
+  const stepText = await page.textContent('#tutorial-step');
+  assert(/lesson 1/i.test(stepText), `shows lesson counter "${stepText}"`);
+
+  // Skip the intro to get to guided play
+  await page.click('#tutorial-skip');
+  await page.waitForSelector('#tutorial-next[hidden]', { timeout: 3000 }).catch(() => null);
+  const playTitle = await page.textContent('#tutorial-title');
+  assert(/boar/i.test(playTitle), `after skip, recommends Boar play, got "${playTitle}"`);
+
   const highlighted = await page.$$('.card.tutorial-target');
   assert(highlighted.length >= 1, `at least one card highlighted (${highlighted.length})`);
 
-  // End tutorial button hides the bar
+  // End tutorial hides the bar
   await page.click('#tutorial-end');
   await page.waitForFunction(() => document.querySelector('#tutorial-bar').hidden);
   assert(errs.length === 0, `no console errors (${errs.join('; ')})`);

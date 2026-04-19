@@ -534,12 +534,30 @@ footer a { color: var(--gold); }
   display: flex;
   gap: 0.75rem;
   align-items: flex-start;
-  padding: 0.65rem 1rem;
+  padding: 0.75rem 1rem;
   background: var(--panel-bg);
   border-bottom: 1px solid var(--gold);
   border-top: 1px solid var(--panel-border);
   animation: tutorial-in 0.3s ease-out;
 }
+.tutorial-bar.intro {
+  padding: 1rem 1.25rem;
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 0 0 8px 8px;
+  border: 1px solid var(--gold);
+  border-top: none;
+  box-shadow: var(--shadow-lift);
+}
+.tutorial-actions { display: flex; flex-direction: column; gap: 0.35rem; flex-shrink: 0; align-items: stretch; }
+.tutorial-step {
+  color: var(--gold);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+.tutorial-body { white-space: pre-wrap; }
 .tutorial-bar[hidden] { display: none; }
 .tutorial-text { flex: 1; min-width: 0; }
 .tutorial-title {

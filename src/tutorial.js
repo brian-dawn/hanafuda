@@ -1,3 +1,50 @@
+// ---------------------------------------------------------------------------
+// Intro slides: plain-language walkthrough of the rules BEFORE any gameplay
+// advice. The tutorial starts here; the player clicks "Next" through the
+// slides and only after the last one does card-highlighting guided play
+// begin. This prevents the tutorial from dropping jargon like "Ino-Shika-Chō"
+// on a player who has never seen the game before.
+// ---------------------------------------------------------------------------
+
+export const INTRO_SLIDES = [
+  {
+    title: 'Welcome to Hanafuda Koi-Koi',
+    body:  'Hanafuda (花札, "flower cards") is a traditional Japanese card game with 48 illustrated cards — one plant per month, four cards per month. Koi-Koi is the most popular way to play them. This walkthrough will teach you the whole game in about 5 minutes. Click Next to continue.',
+    highlight: null,
+  },
+  {
+    title: 'Look at the board',
+    body:  'Your 8 hand cards are at the bottom — only you can see what they are. The 8 face-up cards in the middle are the field — everyone can see those. The opponent\'s 8 cards are at the top, face-down. The deck (on the left of the field) has the remaining 24 cards.',
+    highlight: 'field',
+  },
+  {
+    title: 'There are 4 card types',
+    body:  'Each of the 48 cards belongs to one of four types. The type matters because scoring is based on how many of each you collect:\n\n• Brights (Hikari) — 5 cards in the deck. Highest value.\n• Animals (Tane) — 9 cards. Medium value.\n• Ribbons (Tan) — 10 cards. Medium value.\n• Chaff (Kasu) — 24 cards. Low individual value, but you need a lot of them.\n\nHover any card (or long-press on mobile) to see what it is.',
+    highlight: 'captures',
+  },
+  {
+    title: 'How capturing works',
+    body:  'It\'s simple: every card belongs to a month (January through December). You capture by MATCHING the month.\n\n1. Click a card in your hand.\n2. If any field card has the same month, you capture both into your pile.\n3. If no field card matches, your played card joins the field instead.\n4. Then the top of the deck flips over. Same rule — match and capture, or join the field.\n\nAfter that it\'s the opponent\'s turn.',
+    highlight: null,
+  },
+  {
+    title: 'Scoring: yaku (combos)',
+    body:  'You don\'t score just by capturing cards — you score by forming yaku, which are special combinations. A few common ones:\n\n• 3 Brights = 5 points (called Sankō)\n• Boar + Deer + Butterflies = 5 points (Ino-Shika-Chō)\n• 5+ Animals = 1 point, plus 1 per extra\n• 5+ Ribbons = 1 point, plus 1 per extra\n• 10+ Chaff = 1 point, plus 1 per extra\n\nThe goal each hand is to build one or more yaku, then decide when to stop.',
+    highlight: null,
+  },
+  {
+    title: 'The Koi-Koi decision',
+    body:  'As soon as you form ANY yaku, you get a choice:\n\n• Agari — stop and lock in the points.\n• Koi-Koi — keep playing to build more. If you score more, your total doubles. BUT — if the opponent scores first, THEIR points double.\n\n"Koi-Koi" literally means "come on, come on!" — an invitation to keep the hand going.',
+    highlight: null,
+  },
+  {
+    title: 'Your hand is set up for you',
+    body:  'For this tutorial, I dealt you a friendly hand: you\'re holding all three of the special animals (Boar, Deer, and Butterflies) needed for Ino-Shika-Chō. Every one of them has a matching card waiting on the field.\n\nFrom here on, I\'ll highlight the best card to play and explain why. When you form your first yaku, I\'ll coach you through the Koi-Koi decision.\n\nReady? Click Start.',
+    highlight: null,
+    lastLabel: 'Start',
+  },
+];
+
 // Scripted beginner tutorial.
 //
 // A pre-constructed deal plus a recommend-next-move function. The deck is
@@ -71,7 +118,27 @@ export function tutorialDeck() {
 
 // --- advice ---------------------------------------------------------------
 
-export function tutorialAdvice(state) {
+// Intro-aware advice: while introStep < INTRO_SLIDES.length, return the
+// corresponding slide. Once the intro is done, fall through to reactive
+// gameplay advice.
+export function tutorialAdvice(state, introStep = INTRO_SLIDES.length) {
+  if (introStep < INTRO_SLIDES.length) {
+    const slide = INTRO_SLIDES[introStep];
+    return {
+      intro: {
+        step: introStep,
+        total: INTRO_SLIDES.length,
+        title: slide.title,
+        body:  slide.body,
+        nextLabel: slide.lastLabel || 'Next',
+        highlight: slide.highlight,
+      },
+    };
+  }
+  return tutorialPlayAdvice(state);
+}
+
+function tutorialPlayAdvice(state) {
   // Sticky phase tips always win.
   if (state.phase === 'ask-koi-koi' && state.turn === 0) return koiAdvice(state);
   if (state.phase === 'choose-match' && state.turn === 0) return pickMatchAdvice(state, 'hand');

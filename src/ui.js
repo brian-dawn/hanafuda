@@ -3,7 +3,7 @@
 
 import { TYPES, MONTH_NAMES, cardYakuRoles } from './cards.js';
 import { scoreHand } from './scoring.js';
-import { tutorialAdvice } from './tutorial.js';
+import { tutorialAdvice, INTRO_SLIDES } from './tutorial.js';
 
 const $ = sel => document.querySelector(sel);
 
@@ -26,6 +26,8 @@ export function createUI(handlers) {
   $('#theme-toggle').addEventListener('click', toggleTheme);
   $('#tutorial-btn').addEventListener('click', () => handlers.onToggleTutorial());
   $('#tutorial-end').addEventListener('click', () => handlers.onToggleTutorial(false));
+  $('#tutorial-next').addEventListener('click', () => handlers.onTutorialNext());
+  $('#tutorial-skip').addEventListener('click', () => handlers.onTutorialSkip());
   wireHelpDialog();
   wireTooltip();
 
@@ -146,9 +148,10 @@ function render(state, handlers) {
   renderTurnIndicator(state);
   renderScoreboard(state);
   renderHand('#opp-hand', state.players[1].hand, { faceDown: true });
+  const inIntro = state.tutorialActive && (state.tutorialIntroStep ?? 0) < INTRO_SLIDES.length;
   renderHand('#me-hand', state.players[0].hand, {
     faceDown: false,
-    clickable: state.turn === 0 && state.phase === 'play-hand',
+    clickable: !inIntro && state.turn === 0 && state.phase === 'play-hand',
     onClick: cardId => handlers.onPlayHand(cardId),
   });
   renderCaptures('#opp-captures', state.players[1].captures);
@@ -175,7 +178,36 @@ function renderTutorialBar(state) {
     return;
   }
   btn.classList.add('active');
-  const advice = tutorialAdvice(state);
+
+  const introStep = state.tutorialIntroStep ?? 0;
+  const advice = tutorialAdvice(state, introStep);
+
+  // Intro mode: slide content, Next/Skip buttons, no card highlighting.
+  if (advice.intro) {
+    clearTutorialHighlights();
+    const { step, total, title, body, nextLabel } = advice.intro;
+    const sig = `intro:${step}`;
+    if (sig !== currentTipSig) {
+      currentTipSig = sig;
+      bar.hidden = false;
+      bar.classList.add('intro');
+      $('#tutorial-step').hidden = false;
+      $('#tutorial-step').textContent = `Lesson ${step + 1} of ${total}`;
+      $('#tutorial-title').textContent = title;
+      $('#tutorial-body').textContent = body;
+      $('#tutorial-strategy').hidden = true;
+      $('#tutorial-next').hidden = false;
+      $('#tutorial-next').textContent = nextLabel;
+      $('#tutorial-skip').hidden = step >= total - 1;
+    }
+    return;
+  }
+
+  // Play mode: reactive tips + card highlighting.
+  bar.classList.remove('intro');
+  $('#tutorial-step').hidden = true;
+  $('#tutorial-next').hidden = true;
+  $('#tutorial-skip').hidden = true;
   const { tip, recommend } = advice;
   applyTutorialHighlights(recommend);
   if (!tip) { bar.hidden = true; currentTipSig = null; return; }

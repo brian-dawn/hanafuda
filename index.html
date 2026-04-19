@@ -32,11 +32,16 @@
   </header>
   <div id="tutorial-bar" class="tutorial-bar" hidden>
     <div class="tutorial-text">
+      <div class="tutorial-step" id="tutorial-step" hidden></div>
       <div class="tutorial-title" id="tutorial-title"></div>
       <div class="tutorial-body" id="tutorial-body"></div>
       <div class="tutorial-strategy" id="tutorial-strategy" hidden></div>
     </div>
-    <button id="tutorial-end" type="button" class="ghost" title="End tutorial">End</button>
+    <div class="tutorial-actions">
+      <button id="tutorial-skip" type="button" class="ghost" title="Skip intro" hidden>Skip</button>
+      <button id="tutorial-next" type="button" hidden>Next</button>
+      <button id="tutorial-end" type="button" class="ghost" title="End tutorial">End</button>
+    </div>
   </div>
 
   <main id="board">

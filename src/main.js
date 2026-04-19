@@ -5,7 +5,7 @@ import { CARDS } from './cards.js';
 import { createGame, playCard, chooseMatch, decideKoiKoi, nextHand } from './game.js';
 import { chooseMove, chooseMatchTarget, chooseKoiKoi } from './ai.js';
 import { createUI, registerCards, tutorialReset } from './ui.js';
-import { tutorialDeck } from './tutorial.js';
+import { tutorialDeck, INTRO_SLIDES } from './tutorial.js';
 
 registerCards(CARDS);
 
@@ -31,12 +31,12 @@ let tutorialActive = localStorage.getItem('koikoi-tutorial') === '1';
 function newGameState() {
   const opts = { rng: rngFromUrl() };
   if (tutorialActive) {
-    // Only 1 hand for the tutorial — short and focused.
     opts.deckOverride = tutorialDeck();
     opts.maxHands = 1;
   }
   const s = createGame(opts);
   s.tutorialActive = tutorialActive;
+  s.tutorialIntroStep = tutorialActive ? 0 : INTRO_SLIDES.length;
   return s;
 }
 
@@ -48,7 +48,26 @@ const ui = createUI({
   onNextHand,
   onNewMatch,
   onToggleTutorial,
+  onTutorialNext,
+  onTutorialSkip,
 });
+
+function onTutorialNext() {
+  if (!state.tutorialActive) return;
+  const step = (state.tutorialIntroStep ?? 0) + 1;
+  state = { ...state, tutorialIntroStep: step };
+  ui.render(state);
+  // Don't kick off AI while the user is still reading intro slides — but
+  // once intro is over, resume whatever turn flow exists.
+  if (step >= INTRO_SLIDES.length) maybeAITurn();
+}
+
+function onTutorialSkip() {
+  if (!state.tutorialActive) return;
+  state = { ...state, tutorialIntroStep: INTRO_SLIDES.length };
+  ui.render(state);
+  maybeAITurn();
+}
 
 function onToggleTutorial(forceValue) {
   tutorialActive = typeof forceValue === 'boolean' ? forceValue : !tutorialActive;
