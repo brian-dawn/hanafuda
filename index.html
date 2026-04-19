@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Koi-Koi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <h1>花札 <span class="subtitle">Koi-Koi</span></h1>
+    <div class="scoreboard" id="scoreboard"></div>
+    <button id="new-match" type="button">New Match</button>
+  </header>
+
+  <main id="board">
+    <section class="lane lane-opponent">
+      <div class="lane-label">Opponent</div>
+      <div class="hand hand-opponent" id="opp-hand"></div>
+      <div class="captures" id="opp-captures"></div>
+    </section>
+
+    <section class="lane lane-center">
+      <div class="deck-area">
+        <div class="deck" id="deck"></div>
+        <div class="deck-count" id="deck-count"></div>
+      </div>
+      <div class="field" id="field"></div>
+      <aside class="side-panel">
+        <div class="panel yaku-panel" id="yaku-panel">
+          <h2>Yaku</h2>
+          <div id="yaku-list"></div>
+        </div>
+        <div class="panel log-panel">
+          <h2>Log</h2>
+          <div id="log"></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="lane lane-you">
+      <div class="captures" id="me-captures"></div>
+      <div class="hand hand-me" id="me-hand"></div>
+      <div class="lane-label">You</div>
+    </section>
+  </main>
+
+  <dialog id="koikoi-dialog">
+    <h2>New Yaku!</h2>
+    <div id="koikoi-yaku"></div>
+    <div class="koikoi-choice">
+      <button id="btn-agari" type="button">Agari (take points)</button>
+      <button id="btn-koikoi" type="button">Koi-Koi!</button>
+    </div>
+  </dialog>
+
+  <dialog id="handover-dialog">
+    <h2 id="handover-title">Hand Over</h2>
+    <div id="handover-body"></div>
+    <button id="btn-next-hand" type="button">Next Hand</button>
+  </dialog>
+
+  <dialog id="matchover-dialog">
+    <h2 id="matchover-title">Match Complete</h2>
+    <div id="matchover-body"></div>
+    <button id="btn-new-match" type="button">Play Again</button>
+  </dialog>
+
+  <footer>
+    <details>
+      <summary>Credits & Rules</summary>
+      <p>Card art from <a href="https://commons.wikimedia.org/wiki/Category:SVG_Hanafuda_with_traditional_colors_(black_border)" target="_blank" rel="noopener">Wikimedia Commons — SVG Hanafuda (black border)</a>. See <a href="assets/CREDITS.md" target="_blank">CREDITS.md</a>.</p>
+      <p>Rules: standard Koi-Koi. Match cards by month; form yaku; call Koi-Koi to continue, or Agari to score. 3-hand match.</p>
+    </details>
+  </footer>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
