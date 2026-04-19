@@ -5,11 +5,14 @@ import { createGame, playCard, chooseMatch, decideKoiKoi, nextHand } from './gam
 import { chooseMove, chooseMatchTarget, chooseKoiKoi } from './ai.js';
 import { createUI } from './ui.js';
 
-const AI_DELAY_MS = 550;
+// URL ?fast=1 collapses animations for automated tests.
+const params = new URLSearchParams(location.search);
+const FAST = params.get('fast') === '1';
+const AI_DELAY_MS = FAST ? 20 : 700;
+const AI_SUBSTEP_MS = FAST ? 10 : 500;
 
 // Deterministic RNG for repeatable tests — toggled on by ?seed=N in URL.
 function rngFromUrl() {
-  const params = new URLSearchParams(location.search);
   const seed = params.get('seed');
   if (!seed) return Math.random;
   let s = Number(seed) || 1;
@@ -83,50 +86,50 @@ function maybeAITurn() {
 
 function stepAiAndRender() {
   if (state.turn !== 1) return;
-  stepAi();
+  const acted = stepAi();  // does exactly one state transition
   ui.render(state);
+  if (!acted) return;
   if (state.turn === 1 && state.phase !== 'hand-over' && state.phase !== 'match-over') {
-    setTimeout(stepAiAndRender, AI_DELAY_MS);
+    setTimeout(stepAiAndRender, AI_SUBSTEP_MS);
   }
 }
 
+// One primitive action per call — returns true if a transition happened.
+// Splitting this way gives the player time to see each step render.
 function stepAi() {
   switch (state.phase) {
     case 'play-hand': {
       const move = chooseMove(state);
-      if (!move || move.cardId == null) {
-        // No legal move; shouldn't happen unless hand is empty.
-        return;
-      }
+      if (!move || move.cardId == null) return false;
       state = playCard(state, move.cardId);
-      // If that transitioned into choose-match, immediately pick target
-      if (state.phase === 'choose-match' && move.matchId != null) {
-        state = chooseMatch(state, move.matchId);
-      } else if (state.phase === 'choose-match') {
-        const pick = chooseMatchTarget(state);
-        if (pick != null) state = chooseMatch(state, pick);
-      }
-      // If drawn card led to choose-match-deck, pick target too
-      if (state.phase === 'choose-match-deck') {
-        const pick = chooseMatchTarget(state);
-        if (pick != null) state = chooseMatch(state, pick);
-      }
-      break;
+      // Remember the preferred match target so next stepAi can use it.
+      aiPreferredMatch = move.matchId;
+      return true;
     }
     case 'choose-match':
     case 'choose-match-deck': {
-      const pick = chooseMatchTarget(state);
-      if (pick != null) state = chooseMatch(state, pick);
-      break;
+      const pick = aiPreferredMatch != null && currentPendingCandidatesInclude(aiPreferredMatch)
+        ? aiPreferredMatch
+        : chooseMatchTarget(state);
+      aiPreferredMatch = null;
+      if (pick != null) { state = chooseMatch(state, pick); return true; }
+      return false;
     }
     case 'ask-koi-koi': {
       const choice = chooseKoiKoi(state);
       state = decideKoiKoi(state, choice);
-      break;
+      return true;
     }
     default:
-      return;
+      return false;
   }
+}
+
+let aiPreferredMatch = null;
+
+function currentPendingCandidatesInclude(id) {
+  const p = state.pendingMatch || state.pendingDraw;
+  return p && p.candidates.some(c => c.id === id);
 }
 
 ui.render(state);

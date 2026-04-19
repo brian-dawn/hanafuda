@@ -11,7 +11,7 @@ import url from 'node:url';
 import { chromium } from 'playwright';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const PORT = 5173;
+const PORT = 8713;
 const HEADED = process.argv.includes('--headed');
 
 const MIME = {
@@ -69,7 +69,7 @@ async function runGameSmoke(browser) {
   const consoleLogs = [];
   page.on('pageerror', e => consoleErrors.push(String(e)));
   page.on('console', m => { if (m.type() === 'error') consoleErrors.push(m.text()); consoleLogs.push(m.text()); });
-  await page.goto(`http://localhost:${PORT}/?seed=42`);
+  await page.goto(`http://localhost:${PORT}/?seed=42&fast=1`);
 
   // Wait for game to load.
   await page.waitForFunction(() => window.__koiKoi && window.__koiKoi.state, { timeout: 5000 });
@@ -100,7 +100,7 @@ async function runFullMatch(browser) {
   const consoleErrors = [];
   page.on('pageerror', e => consoleErrors.push(String(e)));
   page.on('console', m => { if (m.type() === 'error') consoleErrors.push(m.text()); });
-  await page.goto(`http://localhost:${PORT}/?seed=7`);
+  await page.goto(`http://localhost:${PORT}/?seed=7&fast=1`);
   await page.waitForFunction(() => window.__koiKoi && window.__koiKoi.state, { timeout: 5000 });
 
   // A simple human strategy in the page: for each hand card, try to play
