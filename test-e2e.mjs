@@ -49,7 +49,7 @@ function assert(cond, msg) {
 }
 
 async function runScoringTests(browser) {
-  console.log('\n[1/4] scoring unit tests in browser');
+  console.log('\n[1/5] scoring unit tests in browser');
   const page = await browser.newPage();
   const consoleErrors = [];
   page.on('pageerror', e => consoleErrors.push(String(e)));
@@ -63,7 +63,7 @@ async function runScoringTests(browser) {
 }
 
 async function runGameSmoke(browser) {
-  console.log('\n[2/4] game smoke test with fixed seed');
+  console.log('\n[2/5] game smoke test with fixed seed');
   const page = await browser.newPage();
   const consoleErrors = [];
   const consoleLogs = [];
@@ -94,8 +94,28 @@ async function runGameSmoke(browser) {
   await page.close();
 }
 
+async function runTutorial(browser) {
+  console.log('\n[3/5] tutorial mode');
+  const page = await browser.newPage();
+  const errs = [];
+  page.on('pageerror', e => errs.push(String(e)));
+  await page.goto(`http://localhost:${PORT}/?seed=5&fast=1`);
+  await page.waitForFunction(() => window.__koiKoi && window.__koiKoi.state);
+
+  await page.click('#tutorial-btn');
+  await page.waitForSelector('#tutorial-bar:not([hidden])');
+  const title = await page.textContent('#tutorial-title');
+  assert(title && title.toLowerCase().includes('welcome'), `tutorial opens with welcome tip, got "${title}"`);
+
+  // End tutorial button hides the bar
+  await page.click('#tutorial-end');
+  await page.waitForFunction(() => document.querySelector('#tutorial-bar').hidden);
+  assert(errs.length === 0, `no console errors (${errs.join('; ')})`);
+  await page.close();
+}
+
 async function runHelpAndTooltip(browser) {
-  console.log('\n[3/4] help modal + tooltip');
+  console.log('\n[4/5] help modal + tooltip');
   const page = await browser.newPage();
   const errs = [];
   page.on('pageerror', e => errs.push(String(e)));
@@ -122,7 +142,7 @@ async function runHelpAndTooltip(browser) {
 }
 
 async function runFullMatch(browser) {
-  console.log('\n[4/4] play a full 3-hand match');
+  console.log('\n[5/5] play a full 3-hand match');
   const page = await browser.newPage();
   const consoleErrors = [];
   page.on('pageerror', e => consoleErrors.push(String(e)));
@@ -207,6 +227,7 @@ async function main() {
     try {
       await runScoringTests(browser);
       await runGameSmoke(browser);
+      await runTutorial(browser);
       await runHelpAndTooltip(browser);
       await runFullMatch(browser);
     } finally {

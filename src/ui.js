@@ -3,6 +3,7 @@
 
 import { TYPES, MONTH_NAMES, cardYakuRoles } from './cards.js';
 import { scoreHand } from './scoring.js';
+import { nextTip, resetTutorial } from './tutorial.js';
 
 const $ = sel => document.querySelector(sel);
 
@@ -23,6 +24,8 @@ export function createUI(handlers) {
   $('#btn-new-match').addEventListener('click', () => handlers.onNewMatch());
   $('#new-match').addEventListener('click', () => handlers.onNewMatch());
   $('#theme-toggle').addEventListener('click', toggleTheme);
+  $('#tutorial-btn').addEventListener('click', () => handlers.onToggleTutorial());
+  $('#tutorial-end').addEventListener('click', () => handlers.onToggleTutorial(false));
   wireHelpDialog();
   wireTooltip();
 
@@ -155,8 +158,45 @@ function render(state, handlers) {
   renderYakuPanel(state);
   renderLog(state);
   renderDialogs(state);
+  renderTutorialBar(state);
 
   applyFLIP(prevRects, state);
+}
+
+let currentTipId = null;
+function renderTutorialBar(state) {
+  const bar = $('#tutorial-bar');
+  const btn = $('#tutorial-btn');
+  if (!state.tutorialActive) {
+    bar.hidden = true;
+    btn.classList.remove('active');
+    currentTipId = null;
+    return;
+  }
+  btn.classList.add('active');
+  const tip = nextTip(state);
+  if (!tip) {
+    // keep the previous tip shown (no flicker) unless bar is hidden
+    if (!currentTipId) bar.hidden = true;
+    return;
+  }
+  if (tip.id === currentTipId) return;  // no change
+  currentTipId = tip.id;
+  bar.hidden = false;
+  $('#tutorial-title').textContent = tip.title;
+  $('#tutorial-body').textContent = tip.text;
+  const strat = $('#tutorial-strategy');
+  if (tip.strategy) {
+    strat.textContent = tip.strategy;
+    strat.hidden = false;
+  } else {
+    strat.hidden = true;
+  }
+}
+
+export function tutorialReset() {
+  resetTutorial();
+  currentTipId = null;
 }
 
 function applyFLIP(prevRects, state) {

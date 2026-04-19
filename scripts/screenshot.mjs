@@ -80,5 +80,20 @@ for (const vp of viewports) {
   await page.close();
 }
 
+// Tutorial bar, desktop, dark
+{
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await page.addInitScript(t => localStorage.setItem('koikoi-theme', t), 'dark');
+  await page.goto(`http://localhost:${PORT}/?seed=11&fast=1`);
+  await page.waitForFunction(() => window.__koiKoi && window.__koiKoi.state);
+  await page.click('#tutorial-btn');
+  await page.waitForSelector('#tutorial-bar:not([hidden])');
+  await page.waitForTimeout(300);
+  const out = path.join(ROOT, 'screenshot-tutorial-dark.png');
+  await page.screenshot({ path: out, fullPage: false });
+  console.log(`wrote ${out}`);
+  await page.close();
+}
+
 await browser.close();
 server.close();

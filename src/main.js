@@ -4,7 +4,7 @@
 import { CARDS } from './cards.js';
 import { createGame, playCard, chooseMatch, decideKoiKoi, nextHand } from './game.js';
 import { chooseMove, chooseMatchTarget, chooseKoiKoi } from './ai.js';
-import { createUI, registerCards } from './ui.js';
+import { createUI, registerCards, tutorialReset } from './ui.js';
 
 registerCards(CARDS);
 
@@ -25,14 +25,38 @@ function rngFromUrl() {
   };
 }
 
-let state = createGame({ rng: rngFromUrl() });
+let tutorialActive = localStorage.getItem('koikoi-tutorial') === '1';
+
+function newGameState() {
+  const s = createGame({ rng: rngFromUrl() });
+  s.tutorialActive = tutorialActive;
+  return s;
+}
+
+let state = newGameState();
 const ui = createUI({
   onPlayHand,
   onPickField,
   onKoiKoi,
   onNextHand,
   onNewMatch,
+  onToggleTutorial,
 });
+
+function onToggleTutorial(forceValue) {
+  tutorialActive = typeof forceValue === 'boolean' ? forceValue : !tutorialActive;
+  localStorage.setItem('koikoi-tutorial', tutorialActive ? '1' : '0');
+  tutorialReset();
+  // If enabling, start fresh so welcome tip fires. If disabling, just rerender.
+  if (tutorialActive) {
+    state = newGameState();
+    ui.render(state);
+    maybeAITurn();
+  } else {
+    state = { ...state, tutorialActive: false };
+    ui.render(state);
+  }
+}
 
 // Expose state to tests (playwright) via window.
 window.__koiKoi = {
@@ -76,7 +100,8 @@ function onNextHand() {
 }
 
 function onNewMatch() {
-  state = createGame({ rng: rngFromUrl() });
+  tutorialReset();
+  state = newGameState();
   ui.render(state);
   maybeAITurn();
 }

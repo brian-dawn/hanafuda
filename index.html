@@ -24,11 +24,20 @@
     <h1>花札 <span class="subtitle">Koi-Koi</span></h1>
     <div class="scoreboard" id="scoreboard"></div>
     <div class="header-actions">
+      <button id="tutorial-btn" type="button" class="ghost" title="Beginner tutorial">Tutorial</button>
       <button id="help-btn" type="button" class="ghost" title="How to play">?</button>
       <button id="theme-toggle" type="button" class="ghost" title="Toggle theme"><span id="theme-icon">☾</span></button>
       <button id="new-match" type="button">New Match</button>
     </div>
   </header>
+  <div id="tutorial-bar" class="tutorial-bar" hidden>
+    <div class="tutorial-text">
+      <div class="tutorial-title" id="tutorial-title"></div>
+      <div class="tutorial-body" id="tutorial-body"></div>
+      <div class="tutorial-strategy" id="tutorial-strategy" hidden></div>
+    </div>
+    <button id="tutorial-end" type="button" class="ghost" title="End tutorial">End</button>
+  </div>
 
   <main id="board">
     <section class="lane lane-opponent">
