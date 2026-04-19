@@ -185,7 +185,8 @@ function renderTutorialBar(state) {
   // Intro mode: slide content, Next/Skip buttons, no card highlighting.
   if (advice.intro) {
     clearTutorialHighlights();
-    const { step, total, title, body, nextLabel } = advice.intro;
+    const { step, total, title, body, nextLabel, spotlight } = advice.intro;
+    applySpotlight(spotlight);
     const sig = `intro:${step}`;
     if (sig !== currentTipSig) {
       currentTipSig = sig;
@@ -202,6 +203,7 @@ function renderTutorialBar(state) {
     }
     return;
   }
+  applySpotlight(null);
 
   // Play mode: reactive tips + card highlighting.
   bar.classList.remove('intro');
@@ -226,6 +228,16 @@ function clearTutorialHighlights() {
   for (const el of document.querySelectorAll('.tutorial-target')) {
     el.classList.remove('tutorial-target');
   }
+}
+
+function applySpotlight(name) {
+  for (const el of document.querySelectorAll('.tutorial-spot-glow')) {
+    el.classList.remove('tutorial-spot-glow');
+  }
+  document.documentElement.toggleAttribute('data-spotlight', !!name);
+  if (!name) return;
+  const el = document.querySelector(`[data-spot="${name}"]`);
+  if (el) el.classList.add('tutorial-spot-glow');
 }
 
 function applyTutorialHighlights(recommend) {

@@ -47,18 +47,18 @@
   <main id="board">
     <section class="lane lane-opponent">
       <div class="lane-label">Opponent</div>
-      <div class="hand hand-opponent" id="opp-hand"></div>
-      <div class="captures" id="opp-captures"></div>
+      <div class="hand hand-opponent" id="opp-hand" data-spot="opp-hand"></div>
+      <div class="captures" id="opp-captures" data-spot="captures-opp"></div>
     </section>
 
     <section class="lane lane-center">
-      <div class="deck-area">
+      <div class="deck-area" data-spot="deck-area">
         <div class="deck" id="deck"></div>
         <div class="deck-count" id="deck-count"></div>
       </div>
-      <div class="field" id="field"></div>
+      <div class="field" id="field" data-spot="field"></div>
       <aside class="side-panel">
-        <div class="panel yaku-panel" id="yaku-panel">
+        <div class="panel yaku-panel" id="yaku-panel" data-spot="yaku-panel">
           <h2>Yaku</h2>
           <div id="yaku-list"></div>
         </div>
@@ -73,8 +73,8 @@
     </section>
 
     <section class="lane lane-you">
-      <div class="captures" id="me-captures"></div>
-      <div class="hand hand-me" id="me-hand"></div>
+      <div class="captures" id="me-captures" data-spot="captures"></div>
+      <div class="hand hand-me" id="me-hand" data-spot="my-hand"></div>
       <div class="lane-label">You</div>
     </section>
   </main>

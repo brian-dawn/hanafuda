@@ -6,42 +6,51 @@
 // on a player who has never seen the game before.
 // ---------------------------------------------------------------------------
 
+// Each slide may spotlight a UI region by name; the UI applies a glow to
+// the matching element during that slide so the player knows what the
+// words are talking about. Valid spotlight targets:
+//   'my-hand', 'opp-hand', 'field', 'deck-area', 'captures', 'yaku-panel'
 export const INTRO_SLIDES = [
   {
     title: 'Welcome to Hanafuda Koi-Koi',
-    body:  'Hanafuda (花札, "flower cards") is a traditional Japanese card game with 48 illustrated cards — one plant per month, four cards per month. Koi-Koi is the most popular way to play them. This walkthrough will teach you the whole game in about 5 minutes. Click Next to continue.',
-    highlight: null,
+    body:  'Hanafuda (花札, "flower cards") is a traditional Japanese card game with 48 illustrated cards — one plant per month, four cards per month. Koi-Koi is the most popular way to play them. This walkthrough will teach you the whole game in about 5 minutes.',
+    spotlight: null,
   },
   {
-    title: 'Look at the board',
-    body:  'Your 8 hand cards are at the bottom — only you can see what they are. The 8 face-up cards in the middle are the field — everyone can see those. The opponent\'s 8 cards are at the top, face-down. The deck (on the left of the field) has the remaining 24 cards.',
-    highlight: 'field',
+    title: 'This is your hand',
+    body:  'At the bottom are YOUR 8 cards (highlighted). Only you can see them. You\'ll play one per turn by clicking it. The AI opponent has their own 8 cards at the top, face-down — you\'ll see them flip over when played.',
+    spotlight: 'my-hand',
   },
   {
-    title: 'There are 4 card types',
-    body:  'Each of the 48 cards belongs to one of four types. The type matters because scoring is based on how many of each you collect:\n\n• Brights (Hikari) — 5 cards in the deck. Highest value.\n• Animals (Tane) — 9 cards. Medium value.\n• Ribbons (Tan) — 10 cards. Medium value.\n• Chaff (Kasu) — 24 cards. Low individual value, but you need a lot of them.\n\nHover any card (or long-press on mobile) to see what it is.',
-    highlight: 'captures',
+    title: 'This is the field',
+    body:  'The 8 face-up cards in the middle are the shared field. Both players can see these. When you play a card from your hand, if any field card has the same plant (same month), you CAPTURE both — they go into your pile. Otherwise your card joins the field.',
+    spotlight: 'field',
   },
   {
-    title: 'How capturing works',
-    body:  'It\'s simple: every card belongs to a month (January through December). You capture by MATCHING the month.\n\n1. Click a card in your hand.\n2. If any field card has the same month, you capture both into your pile.\n3. If no field card matches, your played card joins the field instead.\n4. Then the top of the deck flips over. Same rule — match and capture, or join the field.\n\nAfter that it\'s the opponent\'s turn.',
-    highlight: null,
+    title: 'The deck',
+    body:  'After you play a hand card, the top of the deck is flipped automatically. Same matching rule applies to the flipped card: match a field card → capture both, no match → join the field. The deck has 24 cards at the start (48 minus 8+8+8 dealt).',
+    spotlight: 'deck-area',
   },
   {
-    title: 'Scoring: yaku (combos)',
-    body:  'You don\'t score just by capturing cards — you score by forming yaku, which are special combinations. A few common ones:\n\n• 3 Brights = 5 points (called Sankō)\n• Boar + Deer + Butterflies = 5 points (Ino-Shika-Chō)\n• 5+ Animals = 1 point, plus 1 per extra\n• 5+ Ribbons = 1 point, plus 1 per extra\n• 10+ Chaff = 1 point, plus 1 per extra\n\nThe goal each hand is to build one or more yaku, then decide when to stop.',
-    highlight: null,
+    title: 'Four card types',
+    body:  'Every card has one of 4 types. The type tells you how it scores. As you capture, your pile groups itself by type:\n\n• Brights — 5 in the deck, highest value\n• Animals — 9 cards\n• Ribbons — 10 cards\n• Chaff — 24 cards, low but plentiful\n\nHover any card to see its type and scoring role.',
+    spotlight: 'captures',
   },
   {
-    title: 'The Koi-Koi decision',
-    body:  'As soon as you form ANY yaku, you get a choice:\n\n• Agari — stop and lock in the points.\n• Koi-Koi — keep playing to build more. If you score more, your total doubles. BUT — if the opponent scores first, THEIR points double.\n\n"Koi-Koi" literally means "come on, come on!" — an invitation to keep the hand going.',
-    highlight: null,
+    title: 'Yaku — the scoring combos',
+    body:  'You don\'t score from single captures. You score when your captures form a YAKU — a special combination (like a poker hand). Examples:\n\n• 3 Brights = 5 points\n• Boar + Deer + Butterflies = 5 points\n• 5 or more Animals = 1 point + 1 each extra\n• 5 or more Ribbons = same scaling\n• 10 or more Chaff = same scaling\n\nYour current yaku progress is shown in this panel.',
+    spotlight: 'yaku-panel',
   },
   {
-    title: 'Your hand is set up for you',
-    body:  'For this tutorial, I dealt you a friendly hand: you\'re holding all three of the special animals (Boar, Deer, and Butterflies) needed for Ino-Shika-Chō. Every one of them has a matching card waiting on the field.\n\nFrom here on, I\'ll highlight the best card to play and explain why. When you form your first yaku, I\'ll coach you through the Koi-Koi decision.\n\nReady? Click Start.',
-    highlight: null,
-    lastLabel: 'Start',
+    title: 'Agari or Koi-Koi',
+    body:  'Whenever you form a yaku, a dialog will pop up asking you to choose:\n\n• AGARI — stop the hand, lock in your points.\n• KOI-KOI — keep going. If you form another yaku, your score doubles. But if the opponent scores instead, THEIR score doubles.\n\n"Koi-Koi" means "come on, come on!" — gambling for more.',
+    spotlight: null,
+  },
+  {
+    title: 'Your hand is set up for teaching',
+    body:  'You\'ve been dealt a friendly hand: it includes all three of the animals needed for the "Boar + Deer + Butterflies" yaku (5 points), plus the Moon and Sake Cup for a bonus combo. Every one has a matching card waiting on the field.\n\nFrom here on, I\'ll highlight the best card to play and explain why. Ready?',
+    spotlight: 'my-hand',
+    lastLabel: 'Start playing',
   },
 ];
 
@@ -131,7 +140,7 @@ export function tutorialAdvice(state, introStep = INTRO_SLIDES.length) {
         title: slide.title,
         body:  slide.body,
         nextLabel: slide.lastLabel || 'Next',
-        highlight: slide.highlight,
+        spotlight: slide.spotlight,
       },
     };
   }
