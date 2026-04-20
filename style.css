@@ -49,25 +49,28 @@
 }
 
 :root {
-  --card-w: 92px;
-  --card-h: 150px;
-  --card-radius: 8px;
+  --card-w: 132px;
+  --card-h: 216px;
+  --card-radius: 10px;
 }
 
 /* Tablet */
+@media (max-width: 1400px) {
+  :root { --card-w: 112px; --card-h: 184px; }
+}
 @media (max-width: 1200px) {
-  :root { --card-w: 76px; --card-h: 124px; }
+  :root { --card-w: 92px; --card-h: 150px; }
 }
 @media (max-width: 960px) {
-  :root { --card-w: 66px; --card-h: 108px; }
+  :root { --card-w: 78px; --card-h: 128px; }
 }
 /* Phone */
 @media (max-width: 640px) {
-  :root { --card-w: 56px; --card-h: 92px; }
+  :root { --card-w: 64px; --card-h: 104px; }
 }
 /* Narrow phone */
 @media (max-width: 380px) {
-  :root { --card-w: 48px; --card-h: 78px; }
+  :root { --card-w: 52px; --card-h: 86px; }
 }
 
 * { box-sizing: border-box; }
