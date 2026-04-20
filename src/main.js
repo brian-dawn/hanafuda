@@ -50,6 +50,7 @@ const ui = createUI({
   onToggleTutorial,
   onTutorialNext,
   onTutorialSkip,
+  onCancelPlay,
 });
 
 function onTutorialNext() {
@@ -94,7 +95,12 @@ window.__koiKoi = {
   skipAi: () => { while (state.turn === 1 && state.phase !== 'hand-over' && state.phase !== 'match-over') stepAi(); ui.render(state); },
 };
 
-function set(newState) {
+// One-step undo: saved before each human action so the player can cancel a
+// commitment like a hand-card play that landed them in choose-match.
+let prevState = null;
+
+function set(newState, { savePrev = false } = {}) {
+  if (savePrev) prevState = state; else prevState = null;
   state = newState;
   ui.render(state);
   maybeAITurn();
@@ -102,7 +108,19 @@ function set(newState) {
 
 function onPlayHand(cardId) {
   if (state.turn !== 0 || state.phase !== 'play-hand') return;
-  set(playCard(state, cardId));
+  set(playCard(state, cardId), { savePrev: true });
+}
+
+function onCancelPlay() {
+  if (!prevState) return;
+  // Only allow undo while the consequence is still resolvable -- i.e. still
+  // the player's turn and they haven't committed a field choice or drawn.
+  if (state.turn !== 0) return;
+  if (state.phase === 'choose-match' || state.phase === 'play-hand') {
+    state = prevState;
+    prevState = null;
+    ui.render(state);
+  }
 }
 
 function onPickField(cardId) {

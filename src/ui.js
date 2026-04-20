@@ -28,6 +28,7 @@ export function createUI(handlers) {
   $('#tutorial-end').addEventListener('click', () => handlers.onToggleTutorial(false));
   $('#tutorial-next').addEventListener('click', () => handlers.onTutorialNext());
   $('#tutorial-skip').addEventListener('click', () => handlers.onTutorialSkip());
+  $('#pending-cancel').addEventListener('click', () => handlers.onCancelPlay());
   wireHelpDialog();
   wireTooltip();
 
@@ -74,14 +75,18 @@ function wireTooltip() {
 
   document.addEventListener('mouseover', ev => {
     const el = ev.target.closest('[data-card-id]');
-    if (!el || el.classList.contains('face-down')) { hide(); return; }
+    if (!el || el.classList.contains('face-down')) { hide(); clearPairings(); return; }
     showFor(el, ev);
+    showPairings(el.dataset.cardId);
   });
   document.addEventListener('mousemove', ev => {
     if (!tip.hidden) positionTooltip(ev);
   });
   document.addEventListener('mouseout', ev => {
-    if (!ev.relatedTarget || !ev.relatedTarget.closest?.('[data-card-id]')) hide();
+    if (!ev.relatedTarget || !ev.relatedTarget.closest?.('[data-card-id]')) {
+      hide();
+      clearPairings();
+    }
   });
 
   // Long-press on touch for card info.
@@ -230,6 +235,21 @@ function clearTutorialHighlights() {
   }
 }
 
+function showPairings(cardId) {
+  clearPairings();
+  const me = CARDS_BY_ID_LOCAL.get(String(cardId));
+  if (!me) return;
+  for (const el of document.querySelectorAll('[data-card-id]')) {
+    if (el.classList.contains('face-down')) continue;
+    if (el.dataset.cardId === String(cardId)) continue;
+    const other = CARDS_BY_ID_LOCAL.get(el.dataset.cardId);
+    if (other && other.month === me.month) el.classList.add('pair-match');
+  }
+}
+function clearPairings() {
+  for (const el of document.querySelectorAll('.pair-match')) el.classList.remove('pair-match');
+}
+
 function applySpotlight(name) {
   for (const el of document.querySelectorAll('.tutorial-spot-glow')) {
     el.classList.remove('tutorial-spot-glow');
@@ -305,24 +325,15 @@ function applyFLIP(prevRects, state) {
 }
 
 function renderTurnIndicator(state) {
-  let el = $('.turn-indicator');
-  if (!el) {
-    el = document.createElement('div');
-    el.className = 'turn-indicator';
-    document.body.appendChild(el);
-  }
+  const el = $('#turn-chip');
   if (state.phase === 'match-over' || state.phase === 'hand-over') {
     el.hidden = true;
     return;
   }
   el.hidden = false;
-  if (state.turn === 0) {
-    el.textContent = 'Your turn';
-    el.className = 'turn-indicator you';
-  } else {
-    el.textContent = 'Opponent thinking…';
-    el.className = 'turn-indicator opponent';
-  }
+  el.textContent = state.turn === 0 ? 'Your turn' : 'CPU thinking…';
+  el.classList.toggle('is-you', state.turn === 0);
+  el.classList.toggle('is-opp', state.turn === 1);
 }
 
 function renderScoreboard(state) {
@@ -424,6 +435,20 @@ function renderDeck(state) {
   if (state.deck.length === 0) el.classList.add('empty');
   else el.classList.remove('empty');
   count.textContent = `${state.deck.length} left`;
+
+  // Show the "playing X" indicator when the player is stuck choosing a field
+  // match — so they remember what card they committed.
+  const pending = $('#pending-play');
+  const showPending = state.turn === 0 && state.phase === 'choose-match' && state.pendingMatch;
+  if (showPending) {
+    pending.hidden = false;
+    const card = state.pendingMatch.card;
+    const slot = $('#pending-play-card');
+    slot.innerHTML = '';
+    slot.appendChild(cardEl(card, { faceDown: false }));
+  } else {
+    pending.hidden = true;
+  }
 }
 
 function renderYakuPanel(state) {
@@ -464,16 +489,33 @@ function renderYakuPanel(state) {
 function renderLog(state) {
   const el = $('#log');
   const last = $('#log-last');
-  const tail = state.log.slice(-20);
+  const tail = state.log.slice(-200);
   const freshLines = Math.min(tail.length, Math.max(0, state.log.length - priorLogLength));
   priorLogLength = state.log.length;
   el.innerHTML = tail.map((line, i) => {
     const isNew = i >= tail.length - freshLines;
-    const cls = (line.startsWith('—') ? 'log-hand-header ' : '') + (isNew ? 'log-new' : '');
-    return `<div class="${cls}">${esc(line)}</div>`;
+    return logLineHTML(line, isNew);
   }).join('');
   el.scrollTop = el.scrollHeight;
   if (last) last.textContent = tail[tail.length - 1] || '';
+}
+
+// Classify a log line and emit a styled entry.
+function logLineHTML(line, isNew) {
+  const classes = ['log-line'];
+  let icon = '·';
+  const t = line.trim();
+  if (t.startsWith('—')) { classes.push('log-hand-header'); icon = '✦'; }
+  else if (/koi-koi/i.test(t))           { classes.push('log-koikoi'); icon = '↻'; }
+  else if (/agari/i.test(t))             { classes.push('log-agari');  icon = '★'; }
+  else if (/forms:/i.test(t))            { classes.push('log-yaku');   icon = '✧'; }
+  else if (/captures|sweeps/i.test(t))   { classes.push('log-capture'); icon = '✓'; }
+  else if (/\bdraws\b/i.test(t))         { classes.push('log-draw');   icon = '◈'; }
+  else if (/\bplays\b/i.test(t))         { classes.push('log-play');   icon = '▸'; }
+  else if (/no match|must choose|added to field/i.test(t)) { classes.push('log-note'); icon = '·'; }
+  else if (/ends/i.test(t))              { classes.push('log-hand-header'); icon = '✦'; }
+  if (isNew) classes.push('log-new');
+  return `<div class="${classes.join(' ')}"><span class="log-icon">${icon}</span><span class="log-body">${esc(t)}</span></div>`;
 }
 
 function renderDialogs(state) {

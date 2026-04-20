@@ -150,6 +150,22 @@ async function runHelpAndTooltip(browser) {
   const tipName = await page.textContent('#tooltip .tip-name');
   assert(tipName && tipName.length > 2, `tooltip shows name "${tipName}"`);
 
+  // Hovering a hand card outlines any same-month face-up card on the board.
+  // Count across field + my own hand + captures (excluding the hovered card).
+  const pairs = await page.evaluate(() => {
+    const s = window.__koiKoi.state;
+    const me = s.players[0].hand[0];
+    const all = [
+      ...s.field,
+      ...s.players[0].hand,
+      ...s.players[0].captures,
+      ...s.players[1].captures,
+    ];
+    const expected = all.filter(c => c.month === me.month && c.id !== me.id).length;
+    return { hoveredMonth: me.month, expected, highlighted: document.querySelectorAll('.pair-match').length };
+  });
+  assert(pairs.highlighted === pairs.expected, `pair-match count (${pairs.highlighted}) = same-month cards elsewhere (${pairs.expected}) for month ${pairs.hoveredMonth}`);
+
   assert(errs.length === 0, `no console errors (${errs.join('; ')})`);
   await page.close();
 }

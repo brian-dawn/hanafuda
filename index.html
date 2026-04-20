@@ -23,6 +23,7 @@
   <header>
     <h1>花札 <span class="subtitle">Koi-Koi</span></h1>
     <div class="scoreboard" id="scoreboard"></div>
+    <div class="turn-chip" id="turn-chip" hidden></div>
     <div class="header-actions">
       <button id="tutorial-btn" type="button" class="ghost" title="Beginner tutorial">Tutorial</button>
       <button id="help-btn" type="button" class="ghost" title="How to play">?</button>
@@ -55,6 +56,11 @@
       <div class="deck-area" data-spot="deck-area">
         <div class="deck" id="deck"></div>
         <div class="deck-count" id="deck-count"></div>
+        <div id="pending-play" class="pending-play" hidden>
+          <div class="pending-play-label">Playing</div>
+          <div id="pending-play-card"></div>
+          <button id="pending-cancel" type="button" class="ghost">Cancel</button>
+        </div>
       </div>
       <div class="field" id="field" data-spot="field"></div>
       <aside class="side-panel">
