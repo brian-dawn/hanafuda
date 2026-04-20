@@ -49,28 +49,20 @@
 }
 
 :root {
-  --card-w: 132px;
-  --card-h: 216px;
+  /* Card height scales to fit the viewport. The board stacks:
+   * header + opponent (hand + captures) + center (2-row field) +
+   * player (captures + hand). That's ~4 card-heights plus about 320px
+   * of fixed overhead (header, lane padding, captures, bottom label).
+   * So --card-h solves (100vh - 320) / 4, clamped for sanity.
+   * Width follows Hanafuda's ~0.62 aspect ratio.
+   */
+  --card-h: clamp(80px, calc((100vh - 300px) / 4), 200px);
+  --card-w: calc(var(--card-h) * 0.62);
   --card-radius: 10px;
 }
-
-/* Tablet */
-@media (max-width: 1400px) {
-  :root { --card-w: 112px; --card-h: 184px; }
-}
-@media (max-width: 1200px) {
-  :root { --card-w: 92px; --card-h: 150px; }
-}
-@media (max-width: 960px) {
-  :root { --card-w: 78px; --card-h: 128px; }
-}
-/* Phone */
 @media (max-width: 640px) {
-  :root { --card-w: 64px; --card-h: 104px; }
-}
-/* Narrow phone */
-@media (max-width: 380px) {
-  :root { --card-w: 52px; --card-h: 86px; }
+  /* On phones the layout becomes vertical; width constrains. */
+  :root { --card-h: clamp(84px, calc(14vw * 1.6), 120px); }
 }
 
 * { box-sizing: border-box; }
@@ -168,43 +160,44 @@ button.ghost.active {
 main#board {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: 1rem;
-  padding: 1rem 1.25rem 1.25rem;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
   max-width: 1680px;
   margin: 0 auto;
 }
 @media (max-width: 640px) {
-  main#board { padding: 0.4rem; gap: 0.4rem; }
+  main#board { padding: 0.3rem; gap: 0.3rem; }
 }
 
 .lane {
-  padding: 0.5rem;
+  padding: 0.25rem 0.5rem;
   background: var(--lane-bg);
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid var(--panel-border);
   transition: background 0.3s ease;
 }
 .lane-label {
-  font-size: 0.75rem;
+  font-size: 0.62rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--fg-dim);
-  margin-bottom: 0.25rem;
+  margin: 0;
+  line-height: 1.2;
 }
-.lane-you .lane-label { margin-top: 0.25rem; margin-bottom: 0; }
+.lane-you .lane-label { margin-top: 0.1rem; }
 
 .hand {
   display: flex;
   gap: 0.35rem;
   flex-wrap: wrap;
   min-height: var(--card-h);
-  padding: 0.25rem;
+  padding: 0;
   justify-content: center;
 }
 .hand-me .card { cursor: pointer; }
 
 @media (max-width: 640px) {
-  .hand { gap: 0.2rem; padding: 0.1rem; }
+  .hand { gap: 0.2rem; }
 }
 
 .lane-center {
@@ -287,11 +280,11 @@ main#board {
 .field {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-w), 1fr));
-  gap: 0.55rem;
-  min-height: calc(var(--card-h) * 2 + 1rem);
-  padding: 0.85rem;
+  gap: 0.4rem;
+  min-height: var(--card-h);
+  padding: 0.45rem;
   background: var(--panel-bg);
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid var(--panel-border);
   box-shadow: inset 0 2px 8px rgba(0,0,0,0.15);
   transition: background 0.3s ease;
@@ -399,19 +392,20 @@ main#board {
 
 .captures {
   display: flex;
-  gap: 1rem;
-  padding: 0.35rem;
+  gap: 0.6rem;
+  padding: 0.15rem 0;
   flex-wrap: wrap;
-  min-height: calc(var(--card-h) + 0.5rem);
+  min-height: 0;
 }
+.captures.empty { min-height: 0; height: 0; padding: 0; overflow: hidden; }
 .capture-group {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
+  gap: 0.2rem;
+  padding: 0.2rem 0.4rem;
   background: var(--lane-bg);
   border-radius: 6px;
-  min-width: 70px;
+  min-width: 58px;
 }
 .capture-group-label {
   font-size: 0.65rem;
